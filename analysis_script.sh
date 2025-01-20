@@ -316,14 +316,14 @@ function runAnalysis (){
    set -euo pipefail
 
    subject=$1
+   session=$2
    echo subject : ${subject}
+   echo session : ${session}
 
    # search full paths and filenames for input T1 and FLAIR images in nifti format
-   t1_fn=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz)
-   flair_fn=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_FLAIR.nii.gz)
-   session=$(basename "$(dirname "$(dirname "${flair_fn}")")")
+   t1_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_T1w.nii.gz)
+   flair_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_FLAIR.nii.gz)
 
-   echo session  : ${session}
    echo t1_fn    : ${t1_fn}
    echo flair_fn : ${flair_fn}
    echo
@@ -379,24 +379,13 @@ function runAnalysis (){
 }
 
 function setupRunAnalysis(){
-  echo code_dir  : ${code_dir}
-  echo data_path : ${data_path}
-  echo
-
   # FSL Setup
   FSLDIR=/usr/local/fsl
   PATH=${FSLDIR}/share/fsl/bin:${PATH}
   export FSLDIR PATH
   . ${FSLDIR}/etc/fslconf/fsl.sh
 
-  # Create dir to hold subject logs
-  subject_logs_dir=${code_dir}/subject_logs
-  mkdir -p $subject_logs_dir
-
-  # assign path and filename of the list of subject IDs saved as a text file
-  subjects_list=${data_path}/subjects.txt
-  echo subjects_list : ${subjects_list}
-
+  # Parse input arguments
   n=1
   export overwrite=false
   while getopts "n:o" opt; do
@@ -418,26 +407,42 @@ function setupRunAnalysis(){
     esac
   done
 
+  # Get the list of sessions for each subject
+  subjects_list=${data_path}/subjects.txt
+  echo "Obtaining list of subjets and sessions based on subjects in ${subjects_list}"
+  subjects_sessions=()
+  while IFS= read -r subject; do
+    sessions=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz -print0 | xargs -0 -n 1 dirname | xargs -0 -n 1 dirname | xargs -0 -n 1 basename)
+    for session in $sessions; do
+      subjects_sessions+=("${subject} ${session}")
+      echo "Creating output directory for ${subject} ${session}"
+      mkdir -p ${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/
+    done
+  done < $subjects_list
+
+  # Run the analysis
   if [[ $n -eq 1 ]]
   then
     echo "Running sequentially on 1 core"
-    for subject in $(cat ${subjects_list});
-    do
-      echo "Processing subject with id ${subject}"
-      runAnalysis $subject > $subject_logs_dir/${subject}-log.txt 2>&1
+    for subject_session in "${subjects_sessions[@]}"; do
+      subject=$(echo $subject_session | cut -d ' ' -f 1)
+      session=$(echo $subject_session | cut -d ' ' -f 2)
+      echo "Processing subject with id ${subject} and session ${session}"
+      runAnalysis $subject $session > "${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/${subject}_${session}.log" 2>&1
     done
   else
     echo "Running in parallel with ${n} jobs"
     export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
-    cat ${subjects_list} | parallel --jobs ${n} runAnalysis {} ">" ${subject_logs_dir}/{}-log.txt "2>&1"
+    printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' runAnalysis \{1\} \{2\} ">" "'${data_path}/\{1\}/\{2\}/derivatives/enigma-pd-wml/\{1\}_\{2\}.log'" "2>&1"
   fi
+
 }
 
 # assign paths for code and input data directories, as well as overall log file
 export code_dir=/code
 export data_path=/data
-overall_log=${code_dir}/overall_log.txt
+overall_log=${data_path}/enigma-pd-wml.log
 
 echo "Running analysis script"
-echo "See overall log at /code/overall_log.txt and subject logs at /code/subject_logs/"
+echo "See overall log at \${DATA_DIR}/enigma-pd-wml.log and subject/session logs with the derivatives folders of each session"
 setupRunAnalysis "$@" >> $overall_log 2>&1

@@ -78,8 +78,6 @@ data
 │           └───sub-1_ses-1_FLAIR.nii.gz
 ```
 
-**Note, the `enigma-pd-wml` pipeline currently expects a single session for each subject.**
-
 ## 3. Create `subjects.txt` file
 
 Inside your top-level BIDS directory (e.g. `data` in the above example structure), create a `subjects.txt` file that
