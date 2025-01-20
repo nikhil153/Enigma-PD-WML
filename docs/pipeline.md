@@ -91,4 +91,6 @@ This includes steps to:
 ## Final pipeline outputs
 
 The main pipeline output is then written to a zip file (per subject) at
-`/data/UNet-pgs/subject-id/subject-id_results.zip`
+`/data/UNet-pgs/subject-id/subject-id_results.zip` `${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/`
+where `data_path` the top-level directory containing your BIDS-formatted
+data.
