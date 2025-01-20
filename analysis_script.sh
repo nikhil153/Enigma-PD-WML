@@ -315,25 +315,27 @@ function runAnalysis (){
    # so set them again here
    set -euo pipefail
 
-   subjid=$1
-   echo subjid : ${subjid}
-   echo
+   subject=$1
+   echo subject : ${subject}
 
-   # search full paths and filenames for input T1 and FLAIR images in compressed NIfTI format
-   t1_fn=$(find ${data_path}/${subjid}/niftis/*[Tt]1*.nii.gz)
-   flair_fn=$(find ${data_path}/${subjid}/niftis/*[Ff][Ll][Aa][Ii][Rr]*.nii.gz)
+   # search full paths and filenames for input T1 and FLAIR images in nifti format
+   t1_fn=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz)
+   flair_fn=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_FLAIR.nii.gz)
+   session=$(basename "$(dirname "$(dirname "${flair_fn}")")")
+
+   echo session  : ${session}
    echo t1_fn    : ${t1_fn}
    echo flair_fn : ${flair_fn}
    echo
 
    # assign path for output data directory and create it (if it doesn't exist)
-   export data_outpath=${data_path}/UNet-pgs/${subjid}
+   export data_outpath=${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/
    mkdir -p ${data_outpath}
    echo data_outpath : ${data_outpath}
 
    # REL # Why under code dir?
    # assign path for a temporary data directory under the code directory and create it
-   export temp_dir=${code_dir}/Controls+PD/${subjid}
+   export temp_dir=${code_dir}/Controls+PD/${subject}/${session}
    mkdir -p ${temp_dir}
    echo temp_dir     : ${temp_dir}
    echo
@@ -365,11 +367,11 @@ function runAnalysis (){
    # change to ${data_outpath}
    cd ${data_outpath}
 
-   zip -q ${subjid}_results.zip ./output/results2mni_lin*.nii.gz ./output/results2mni_nonlin*.nii.gz
+   zip -q ${subject}_${session}_results.zip ./output/results2mni_lin*.nii.gz ./output/results2mni_nonlin*.nii.gz
 
    echo =====================================================
    echo please send this zip file to the ENIGMA-PD-Vasc team!
-   echo  ${data_outpath}/${subjid}_results.zip
+   echo  '$DATA_DIR'${data_outpath#/data}/${subject}_${session}_results.zip
    echo =====================================================
    echo
    echo Thank you!
@@ -392,8 +394,8 @@ function setupRunAnalysis(){
   mkdir -p $subject_logs_dir
 
   # assign path and filename of the list of subject IDs saved as a text file
-  subjids_list=${data_path}/subjects.txt
-  echo subjids_list : ${subjids_list}
+  subjects_list=${data_path}/subjects.txt
+  echo subjects_list : ${subjects_list}
 
   n=1
   export overwrite=false
@@ -419,15 +421,15 @@ function setupRunAnalysis(){
   if [[ $n -eq 1 ]]
   then
     echo "Running sequentially on 1 core"
-    for subjid in $(cat ${subjids_list});
+    for subject in $(cat ${subjects_list});
     do
-      echo "Processing subject with id ${subjid}"
-      runAnalysis $subjid > $subject_logs_dir/${subjid}-log.txt 2>&1
+      echo "Processing subject with id ${subject}"
+      runAnalysis $subject > $subject_logs_dir/${subject}-log.txt 2>&1
     done
   else
     echo "Running in parallel with ${n} jobs"
     export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
-    cat ${subjids_list} | parallel --jobs ${n} runAnalysis {} ">" ${subject_logs_dir}/{}-log.txt "2>&1"
+    cat ${subjects_list} | parallel --jobs ${n} runAnalysis {} ">" ${subject_logs_dir}/{}-log.txt "2>&1"
   fi
 }
 
