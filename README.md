@@ -31,12 +31,10 @@ flowchart TD
     installation("`Install prerequisites`")
     convert("`Ensure data is in BIDS format`")
     subjects("`Create a subjects.txt input file`")
-    build("`Build or pull Docker / Apptainer image`")
     run("`Run the container with Docker / Apptainer`")
     installation --> convert
     convert --> subjects
-    subjects --> build
-    build --> run
+    subjects --> run
 ```
 
 ## 1. Install prerequisites
@@ -103,86 +101,50 @@ data
 └── subjects.txt
 ```
 
-## 4. Build or pull the Docker / Apptainer image
+## 4. Run the container
 
-To obtain the image (in Docker or Apptainer), you have the following options:
-
-- Use the image from Docker Hub
-- Build the image from source
-
-### Using the image from docker hub
-
-The image is available on docker hub in the
-[enigma-pd-wml repository](https://hub.docker.com/r/hamiedaharoon24/enigma-pd-wml/tags).
-
-If you want to run the container via docker, you can download it by running:
-
-```bash
-docker pull hamiedaharoon24/enigma-pd-wml:latest
-```
-
-If you want to run the container via Apptainer instead, use:
-
-```bash
-apptainer build enigma-pd-wml.sif docker://hamiedaharoon24/enigma-pd-wml:latest
-```
-
-### Build the image from source
-
-Clone this github repository with:
-
-```bash
-git clone https://github.com/UCL-ARC/Enigma-PD-WML.git
-```
-
-Build the Docker image with:
-
-```bash
-cd Enigma-PD-WML
-docker build -f Dockerfile -t enigma-pd-wml .
-```
-
-If you want to run the container via Apptainer, you can convert this Docker image into an Apptainer one via:
-
-```bash
-docker image save enigma-pd-wml -o enigma-pd-wml.tar
-apptainer build enigma-pd-wml.sif docker-archive:enigma-pd-wml.tar
-```
-
-## 5. Run the container
-
-Below are various ways to run the container. For each, make sure you run the command the top-level directory
+>[!IMPORTANT]
+> When running the container, make sure you run the command from the top-level directory
 of your BIDS-structured data, e.g. the [`data` directory in this example folder structure](#2-convert-data-to-bids-format-if-required)
+<!-- markdownlint-disable MD028/no-blanks-blockquote -->
+> [!NOTE]
+> There are some [optional arguments](#options) you can add to the end of the Docker / Apptainer command.
+<!-- markdownlint-disable MD028/no-blanks-blockquote -->
+> [!TIP]
+> If you encounter issues when running the pipeline, check the [output logs](#output-logs) for any errors.
 
-Note [there are some options](#options) you can add to the end of the Docker / Apptainer command.
+### Using Docker
 
-If you encounter issues when running the pipeline, check the [output logs](#output-logs) for any errors.
+The image is available on Docker Hub in the
+[enigma-pd-wml](https://hub.docker.com/r/hamiedaharoon24/enigma-pd-wml/tags) repository.
 
-### Via docker (using image from docker hub)
-
-```bash
-docker run "$(pwd)":/data hamiedaharoon24/enigma-pd-wml
-```
-
-### Via docker (using image built from source)
-
-```bash
-docker run -v "$(pwd)":/data enigma-pd-wml
-```
-
-### Via apptainer (using image built from source)
-
-You'll need to put the `.sif` file same directory you run the `apptainer` command from,
-or provide the full path to its location.
-
-You should run this command from the directory **above** your top-level BIDS directory, e.g. within `cwd`
-if your data is in `cwd/data`.
+To run the analysis using Docker:
 
 ```bash
-apptainer run --bind ${PWD}/<data_dir>:/data enigma-pd-wml.sif
+docker run -v "${PWD}":/data hamiedaharoon24/enigma-pd-wml:<tag>
 ```
 
-replacing `<data_dir>` with the name of your top-level BIDS folder.
+where `<tag>` is the version of the image you would like to pull.
+
+Note, the image will be downloaded from Docker Hub the first time you run a particular version of the
+image.
+
+### Using Apptainer
+
+The image is available on Sylabs Cloud in the
+[hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml](https://cloud.sylabs.io/library/hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml)
+repository.
+
+To run the analysis using Apptainer:
+
+```bash
+apptainer run --bind "${PWD}":/data hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml:<tag>
+```
+
+where `<tag>` is the version of the image you would like to pull.
+
+Note, the image will be downloaded from Sylabs Cloud the first time you run a particular version of the
+image.
 
 ### Options
 
@@ -210,10 +172,10 @@ replacing `<data_dir>` with the name of your top-level BIDS folder.
 
 ### Output images
 
-After running your analysis, your BIDS directory should have the following structure:
+After running your analysis, your data directory should have the following structure:
 
 ```bash
-bids-data
+data
 ├── dataset_description.json
 ├── enigma-pd-wml.log
 ├── enigma-pd-wml-results.zip

@@ -1,0 +1,62 @@
+name: Publish Docker and Apptainer images
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    name: Build and publish images to Docker Hub and Sylabs Cloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for the image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/enigma-pd-wml
+          tags:
+            type=semver,pattern={{version}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Install Apptainer
+        run: |
+          sudo apt update && \
+          sudo apt install -y software-properties-common && \
+          sudo add-apt-repository -y ppa:apptainer/ppa && \
+          sudo apt install -y apptainer
+
+      - name: Write token for Sylabs Cloud
+        env:
+          SYLABS_TOKEN: ${{ secrets.SYLABS_TOKEN }}
+        run: |
+          mkdir -p ~/.apptainer
+          echo "${SYLABS_TOKEN}" > ~/.apptainer/sylabs-token
+          chmod 600 ~/.apptainer/sylabs-token
+
+      - name: Configure Sylabs Library endpoint
+        run: |
+          apptainer remote add --tokenfile ~/.apptainer/sylabs-token sylabs https://cloud.sylabs.io
+
+      - name: Build and push SIF image
+        run: |
+          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1 | awk -F':' '{print $2}')
+          apptainer build container.sif docker-daemon://${{ secrets.DOCKERHUB_USERNAME }}/enigma-pd-wml:$TAG
+          apptainer push -U container.sif library://${{ secrets.SYLABS_USERNAME }}/enigma-pd-wml/enigma-pd-wml:$TAG

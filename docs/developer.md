@@ -1,5 +1,53 @@
 # Developer docs
 
+## Setup instructions
+
+After installing the necessary [dependencies](../README.md#1-install-prerequisites), you
+will need to clone this repository from GitHub and move into the `Enigma-PD-WML` directory:
+
+```bash
+git clone https://github.com/UCL-ARC/Enigma-PD-WML.git
+cd Enigma-PD-WML
+```
+
+### Building the Docker Image
+
+You can build the image with the following command:
+
+```bash
+cd Enigma-PD-WML
+docker build -f Dockerfile -t enigma-pd-wml .
+```
+
+### Building the Apptainer Image
+
+If you want to run the container via Apptainer, you can convert this Docker image into an Apptainer one via:
+
+```bash
+docker image save enigma-pd-wml -o enigma-pd-wml.tar
+apptainer build enigma-pd-wml.sif docker-archive:enigma-pd-wml.tar
+```
+
+### Running the pipeline with Docker
+
+After building the Docker image, you can run a container based on this local image:
+
+```bash
+docker run -v "${PWD}"/data:/data enigma-pd-wml
+```
+
+Note, this requires your BIDS data is stored in the directory `Enigma-PD-WML/data`.
+
+### Running the pipeline with Apptainer
+
+After building the Apptainer image, you can run a container based on this local image:
+
+```bash
+apptainer run --bind "${PWD}"/data:/data enigma-pd-wml.sif
+```
+
+Note, this requires your BIDS data is stored in the directory `Enigma-PD-WML/data`.
+
 ## Making new releases to docker hub
 
 This repository has a github actions workflow to automate uploading to
