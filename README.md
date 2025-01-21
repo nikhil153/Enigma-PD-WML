@@ -41,7 +41,7 @@ flowchart TD
 
 ## 1. Install prerequisites
 
-If your MRI data isn't in BIDS format, install [Nipoppy](https://nipoppy.readthedocs.io).
+If your MRI data isn't in BIDS format, it is recommended to install [Nipoppy](https://nipoppy.readthedocs.io).
 
 If you want to run the container via Docker, install [Docker Desktop](https://docs.docker.com/get-started/get-docker/).
 They have installation instructions for [Mac](https://docs.docker.com/desktop/install/mac-install/),
@@ -53,7 +53,7 @@ If you want to use Apptainer instead, then follow the
 
 ## 2. Convert data to BIDS format (if required)
 
-If your data isn't structured in BIDS format, you can use [Nipoppy](https://nipoppy.readthedocs.io)
+If your data isn't structured in BIDS format, we recommend you use [Nipoppy](https://nipoppy.readthedocs.io)
 to restructure your into the required format.
 
 For detailed instructions on the BIDSification process, please see the
@@ -89,18 +89,18 @@ Your final file structure should look like below (for two example subject ids):
 
 ```bash
 data
-├───sub-1
-│   └───ses-1
-│       └───anat
-│           ├───sub-1_ses-1_T1w.nii.gz
-│           └───sub-1_ses-1_FLAIR.nii.gz
+├── sub-1
+│   └── ses-1
+│       └── anat
+│           ├── sub-1_ses-1_T1w.nii.gz
+│           └── sub-1_ses-1_FLAIR.nii.gz
 │
-├───sub-2
-│   └───ses-1
-│       └───anat
-│           ├───sub-1_ses-1_T1w.nii.gz
-│           └───sub-1_ses-1_FLAIR.nii.gz
-└───subjects.txt
+├── sub-2
+│   └── ses-1
+│       └── anat
+│           ├── sub-1_ses-1_T1w.nii.gz
+│           └── sub-1_ses-1_FLAIR.nii.gz
+└── subjects.txt
 ```
 
 ## 4. Build or pull the Docker / Apptainer image
@@ -151,9 +151,8 @@ apptainer build enigma-pd-wml.sif docker-archive:enigma-pd-wml.tar
 
 ## 5. Run the container
 
-Below are various ways to run the container. For each, make sure you run the command from directory that contains
-your BIDS data directory, e.g. `current_directory/<data_dir>` where `data_dir` is the folder container your BIDS
-structured data
+Below are various ways to run the container. For each, make sure you run the command the top-level directory
+of your BIDS-structured data, e.g. the [`data` directory in this example folder structure](#2-convert-data-to-bids-format-if-required)
 
 Note [there are some options](#options) you can add to the end of the Docker / Apptainer command.
 
@@ -162,7 +161,7 @@ If you encounter issues when running the pipeline, check the [output logs](#outp
 ### Via docker (using image from docker hub)
 
 ```bash
-docker run -v "$(pwd)"/code:/code -v "$(pwd)"/<data_dir>:/data hamiedaharoon24/enigma-pd-wml
+docker run "$(pwd)"/<data_dir>:/data hamiedaharoon24/enigma-pd-wml
 ```
 
 replacing `<data_dir>` with the name of your top-level BIDS folder.
@@ -170,7 +169,7 @@ replacing `<data_dir>` with the name of your top-level BIDS folder.
 ### Via docker (using image built from source)
 
 ```bash
-docker run -v "$(pwd)"/code:/code -v "$(pwd)"/<data_dir>:/data enigma-pd-wml
+docker run -v "$(pwd)"/<data_dir>:/data enigma-pd-wml
 ```
 
 replacing `<data_dir>` with the name of your top-level BIDS folder.
@@ -181,7 +180,7 @@ You'll need to put the `.sif` file same directory you run the `apptainer` comman
 or provide the full path to its location.
 
 ```bash
-apptainer run --bind ${PWD}/code:/code --bind ${PWD}/<data_dir>:/data enigma-pd-wml.sif
+apptainer run --bind ${PWD}/<data_dir>:/data enigma-pd-wml.sif
 ```
 
 replacing `<data_dir>` with the name of your top-level BIDS folder.
@@ -212,12 +211,41 @@ replacing `<data_dir>` with the name of your top-level BIDS folder.
 
 ### Output images
 
-The main pipeline output will be written to a zip file (per subject) at
-`/<data_dir>/<subject_id>/<session_id>/derivatives/enigmal-pd-wml/<subject_id>_<session_id>_results.zip`
+After running your analysis, your BIDS directory should have the following structure:
 
-where `data_dir` is the top-level directory of your BIDS-structured data.
+```bash
+bids-data
+├── dataset_description.json
+├── enigma-pd-wml.log
+├── enigma-pd-wml-results.zip
+├── sub-1
+│   ├── ses-1
+│   │   ├── anat
+│   │   │   ├── sub-1_ses-1_FLAIR.nii.gz
+│   │   │   └── sub-1_ses-1_T1w.nii.gz
+│   │   └── derivatives
+│   │       └── enigma-pd-wml
+│   │           ├── input/
+│   │           ├── output/
+│   │           ├── sub-1_ses-1.log
+│   │           └── sub-1_ses-1_results.zip
+│   └── ses-2
+│       ├── anat
+│       │   ├── sub-1_ses-2_FLAIR.nii.gz
+│       │   └── sub-1_ses-2_T1w.nii.gz
+│       └── derivatives
+│           └── enigma-pd-wml
+│               ├── input/
+│               ├── output/
+│               ├── sub-1_ses-2.log
+│               └── sub-1_ses-2_results.zip
+```
 
-The output zip file should contain six files within an `output` directory:
+#### Session-level zip files
+
+The pipeline will generate multiple `.zip` files - one per session, e.g. `sub-1_ses-1_results.zip.
+
+These zip files should contain six files:
 
 - `results2mni_lin.nii.gz`: WML segmentations linearly transformed to MNI space.
 
@@ -231,13 +259,25 @@ The output zip file should contain six files within an `output` directory:
 
 - `results2mni_nonlin_perivent.nii.gz`: WML segmentations (periventricular) non-linearly transformed to MNI space.
 
+#### Top-level zip file
+
+A top-level zip file will also be created (`enigma-pd-wml-results.zip`). This will contain all zip files for each session.
+
+**Please send this top-level zip file to the ENIGMA-PD Vasc team.**
+
+#### Intermediate files
+
+The pipeline generates several intermediate files. These are stored in the `derivatives/enigma-pd-wml/input` and
+`derivatives/enigma-pd-wml/output` folders of each session.
+
 ### Output logs
 
 Pipeline logs can be found at:
 
-- `/code/overall_log.txt`: contains minimal information about the initial pipeline setup.
+- `<data_dir>/enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
 
-- `/code/subject_logs`: one log per subject, containing information about the various processing steps.
+- `enigma-pd-wml/<subject>_<session>.log`: one log per session; stored in the session's `derivatives folder`;
+  contains information about the various processing steps.
 
 ## Common issues
 
