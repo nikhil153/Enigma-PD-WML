@@ -35,7 +35,7 @@ flowchart TD
     run("`Run the container with Docker / Apptainer`")
     installation --> convert
     convert --> subjects
-    subjects --> convert
+    subjects --> build
     build --> run
 ```
 
