@@ -161,23 +161,22 @@ If you encounter issues when running the pipeline, check the [output logs](#outp
 ### Via docker (using image from docker hub)
 
 ```bash
-docker run "$(pwd)"/<data_dir>:/data hamiedaharoon24/enigma-pd-wml
+docker run "$(pwd)":/data hamiedaharoon24/enigma-pd-wml
 ```
-
-replacing `<data_dir>` with the name of your top-level BIDS folder.
 
 ### Via docker (using image built from source)
 
 ```bash
-docker run -v "$(pwd)"/<data_dir>:/data enigma-pd-wml
+docker run -v "$(pwd)":/data enigma-pd-wml
 ```
-
-replacing `<data_dir>` with the name of your top-level BIDS folder.
 
 ### Via apptainer (using image built from source)
 
 You'll need to put the `.sif` file same directory you run the `apptainer` command from,
 or provide the full path to its location.
+
+You should run this command from the directory **above** your top-level BIDS directory, e.g. within `cwd`
+if your data is in `cwd/data`.
 
 ```bash
 apptainer run --bind ${PWD}/<data_dir>:/data enigma-pd-wml.sif
@@ -243,7 +242,7 @@ bids-data
 
 #### Session-level zip files
 
-The pipeline will generate multiple `.zip` files - one per session, e.g. `sub-1_ses-1_results.zip.
+The pipeline will generate multiple `.zip` files - one per session, e.g. `sub-1_ses-1_results.zip`.
 
 These zip files should contain six files:
 
@@ -274,7 +273,7 @@ The pipeline generates several intermediate files. These are stored in the `deri
 
 Pipeline logs can be found at:
 
-- `<data_dir>/enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
+- `enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
 
 - `enigma-pd-wml/<subject>_<session>.log`: one log per session; stored in the session's `derivatives folder`;
   contains information about the various processing steps.

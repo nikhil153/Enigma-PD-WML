@@ -20,7 +20,6 @@ RUN echo '\n # FSL Setup \nFSLDIR=/usr/local/fsl \nPATH=${FSLDIR}/share/fsl/bin:
 COPY analysis_script.sh .
 
 RUN mkdir /data
-RUN mkdir /code
 
 RUN chmod +x analysis_script.sh
 

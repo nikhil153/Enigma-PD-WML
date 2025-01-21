@@ -24,7 +24,7 @@ flowchart TD
 ## fsl_anat
 
 First, FSL's `fsl_anat` tool is run on the input T1 image and its output saved to
-`/code/Controls+PD/subject-id/input/t1-mni.anat`.
+`derivatives/enigma-pd-wml/input/t1-mni.anat` folder of each session.
 
 [See FSL's documentation](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/structural/fsl_anat) for details of the various
 processing steps this includes.
@@ -32,12 +32,11 @@ processing steps this includes.
 ## FLAIR preparation
 
 Next, various FSL tools are used to pre-process the input FLAIR image and align it to the T1 image. Results are written
-to `/code/Controls+PD/subject-id/input/flair-bet`. This includes steps to:
+to the `derivatives/enigma-pd-wml/input/flair-bet` directory of each session. This includes steps to:
 
 - Re-orient the FLAIR image to the standard (MNI) orientation with `fslreorient2std`
 
-- Extract the brain with [`bet` (brain extraction tool)
-  ](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/structural/bet?id=bet-brain-extraction-tool)
+- Extract the brain with [`bet` (brain extraction tool)](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/structural/bet?id=bet-brain-extraction-tool)
 
 - Register the FLAIR image to the field-bias-corrected T1 brain (`T1_biascorr_brain`) from `fsl_anat` using
   [`flirt` (FMRIB's Linear Image Registration Tool)](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/registration/flirt/index)
@@ -48,7 +47,7 @@ to `/code/Controls+PD/subject-id/input/flair-bet`. This includes steps to:
 
 Next, various FSL tools are used to create periventricular vs deep white matter masks for both the T1 and FLAIR images.
 These will be used at a later stage to divide WML segmentations into periventicular vs deep white matter. Results are
-written to `/code/Controls+PD/subject-id/input/vent_dist_mapping`.
+written to the `derivatives/enigma-pd-wml/input/vent_dist_mapping` directory of each session.
 
 This includes steps to:
 
@@ -68,7 +67,7 @@ FLAIR images with `fslroi` (if they're larger than 500 pixels in the x or y dime
 
 Run the UNet-pgs segmentation workflow. This uses the `WMHs_segmentation_PGS.sh` script from
 [the pgs docker image](https://hub.docker.com/r/cvriend/pgs/tags). This will produce a WML binary segmentation mask
-under `/code/Controls+PD/subject-id/output/results.nii.gz`
+under the `derivatives/enigma-pd-wml/output/results.nii.gz` of each session.
 
 ## Process outputs of UNets-pgs
 
@@ -90,7 +89,8 @@ This includes steps to:
 
 ## Final pipeline outputs
 
-The main pipeline output is then written to a zip file (per subject) at
-`/data/UNet-pgs/subject-id/subject-id_results.zip` `${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/`
-where `data_path` the top-level directory containing your BIDS-formatted
-data.
+The pipeline will generate multiple `.zip` files - one per session, e.g. `sub-1_ses-1_results.zip`. These are
+stored in the `derivatives/enigma-pd-wml/` directory of each session.
+
+A top-level zip file will also be created (`enigma-pd-wml-results.zip`). This will contain all zip files for each session.
+**Please send this top-level zip file to the ENIGMA-PD Vasc team.**
