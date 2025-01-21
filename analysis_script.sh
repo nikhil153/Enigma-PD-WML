@@ -351,25 +351,15 @@ function runAnalysis (){
 
 }
 
-function setupRunAnalysis(){
-  # FSL Setup
-  FSLDIR=/usr/local/fsl
-  PATH=${FSLDIR}/share/fsl/bin:${PATH}
-  export FSLDIR PATH
-  . ${FSLDIR}/etc/fslconf/fsl.sh
-
-  # Parse input arguments
+function parseArguments() {
   n=1
   export overwrite=false
   while getopts "n:o" opt; do
     case ${opt} in
       n)
-        # Read -n argument, to give number of jobs to use for parallel processing
-        # If n=1 (or isn't specified), run sequentially
         n=${OPTARG}
         ;;
       o)
-        # Read overwrite option. If true, all pipeline steps will be run (even if their output already exists)
         echo "overwrite option enabled"
         overwrite=true
         ;;
@@ -379,6 +369,16 @@ function setupRunAnalysis(){
         ;;
     esac
   done
+}
+
+function setupRunAnalysis(){
+  # FSL Setup
+  FSLDIR=/usr/local/fsl
+  PATH=${FSLDIR}/share/fsl/bin:${PATH}
+  export FSLDIR PATH
+  . ${FSLDIR}/etc/fslconf/fsl.sh
+
+  parseArguments "$@"
 
   # Get the list of sessions for each subject
   subjects_list=${data_path}/subjects.txt
