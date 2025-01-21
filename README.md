@@ -13,8 +13,8 @@ the same scanning session. The analysis steps (including pre- and post- processi
 - [UNet-pgs](https://www.sciencedirect.com/science/article/pii/S1053811921004171?via%3Dihub) : A segmentation pipeline
   for white matter hyperintensities (WMHs) using U-Net.
 
-- [MRIcroGL](https://www.nitrc.org/projects/mricrogl) : A tool including a graphical interface for dcm2niix to convert
-  DICOM images to NIfTI format.
+- [Nipoppy](https://nipoppy.readthedocs.io/en/stable/installation.html) : A Python package
+  to structure DICOM and NIFTI images in BIDS format
 
 For details of the processing steps, see the [pipeline documentation](/docs/pipeline.md).
 
@@ -29,19 +29,19 @@ Setting up and running the pipeline requires the following steps, which are expl
 %%{init: {"flowchart": {"htmlLabels": false}} }%%
 flowchart TD
     installation("`Install prerequisites`")
-    convert("`Convert images to NIfTI`")
-    structure("`Create standard directory structure`")
-    build("`Build Docker / Apptainer image`")
+    convert("`Ensure data is in BIDS format`")
+    subjects("`Create a subjects.txt input file`")
+    build("`Build or pull Docker / Apptainer image`")
     run("`Run the container with Docker / Apptainer`")
     installation --> convert
-    convert --> structure
-    structure --> build
+    convert --> subjects
+    subjects --> build
     build --> run
 ```
 
 ## 1. Install prerequisites
 
-If your MRI data isn't in NIfTI format, download [MRIcroGL from their website](https://www.nitrc.org/projects/mricrogl).
+If your MRI data isn't in BIDS format, it is recommended to install [Nipoppy](https://nipoppy.readthedocs.io).
 
 If you want to run the container via Docker, install [Docker Desktop](https://docs.docker.com/get-started/get-docker/).
 They have installation instructions for [Mac](https://docs.docker.com/desktop/install/mac-install/),
@@ -51,67 +51,61 @@ They have installation instructions for [Mac](https://docs.docker.com/desktop/in
 If you want to use Apptainer instead, then follow the
 [installation instructions on their website](https://apptainer.org/docs/user/main/quick_start.html).
 
-## 2. Convert images to NIfTI format (if required)
+## 2. Convert data to BIDS format (if required)
 
-If your images aren't in NIfTI format, you can use [`dcm2niix`](https://github.com/rordenlab/dcm2niix) to convert them.
-This is available via the command-line or via a graphical interface inside
-[MRIcroGL](https://www.nitrc.org/projects/mricrogl). Steps for converting with the graphical interface are provided
-below:
+If your data isn't structured in BIDS format, we recommend you use [Nipoppy](https://nipoppy.readthedocs.io)
+to restructure your into the required format.
 
-Open MRIcroGL and select `Import > Convert DICOM to NifTI`
+For detailed instructions on the BIDSification process, please see the
+[excellent guide](https://github.com/ENIGMA-PD/FS7?tab=readme-ov-file#getting-started) written by the
+ENIGMA-PD core team for the FS7 pipeline.
 
-![MRIcroGL user interface with the DICOM to NifTI option highlighted](/docs/images/MRIcroGL_window.png)
+Once you have converted your data to BIDS format, your data directory should have the following
+structure:
 
-Set the the output file format to `%i_%p` to include the patient ID and series description in the filename.
+```bash
+data
+├───sub-1
+│   └───ses-1
+│       └───anat
+│           ├───sub-1_ses-1_T1w.nii.gz
+│           └───sub-1_ses-1_FLAIR.nii.gz
+│
+├───sub-2
+│   └───ses-1
+│       └───anat
+│           ├───sub-1_ses-1_T1w.nii.gz
+│           └───sub-1_ses-1_FLAIR.nii.gz
+```
 
-![dcm2niix user interface](/docs/images/MRIcroGL_convert_dicom.png)
+## 3. Create `subjects.txt` file
 
-You can then drag/drop DICOM files and folders onto the right side of the window to convert them. Alternatively, you can
-click the `Select Folder To Convert` button (at the bottom of the left side of the window) to select a folder to convert
-directly.
+Inside your top-level BIDS directory (e.g. `data` in the above example structure), create a `subjects.txt` file that
+contains subject identifiers (one per line).
 
-## 3. Create standard directory structure
-
-Create a directory (anywhere on your computer) to hold your input image data and the generated results.
-
-Inside this directory:
-
-- Create `code` and `data` directories. The `code` folder should remain empty.
-
-- Inside the `data` folder, create a `subjects.txt` file that contains subject identifiers (one per line) e.g. these
-  could be numeric subject ids.
-
-- For each subject id:
-  - Create a directory at `data/subject-id` (replacing 'subject-id' with the relevant id from your `subjects.txt` file)
-
-  - Create a sub-directory inside the 'subject-id' directory called `niftis`.
-
-  - Inside `niftis` place the subject's T1 MRI scan and FLAIR MRI scan. Both these files should be in nifti format
-  (ending `.nii.gz`) and contain either `T1` or `FLAIR` in their name respectively.
+The subject identifies **must** match the names of the corresponding subject folders, e.g. `sub-1`, `sub-2`.
 
 Your final file structure should look like below (for two example subject ids):
 
 ```bash
-Enigma-PD-WML
+data
+├── sub-1
+│   └── ses-1
+│       └── anat
+│           ├── sub-1_ses-1_T1w.nii.gz
+│           └── sub-1_ses-1_FLAIR.nii.gz
 │
-├───code
-│
-└───data
-    ├───subject-1
-    │   └───niftis
-    │       ├───T1.nii.gz
-    │       └───FLAIR.nii.gz
-    │
-    ├───subject-2
-    │   └───niftis
-    │       ├───T1.nii.gz
-    │       └───FLAIR.nii.gz
-    └───subjects.txt
+├── sub-2
+│   └── ses-1
+│       └── anat
+│           ├── sub-1_ses-1_T1w.nii.gz
+│           └── sub-1_ses-1_FLAIR.nii.gz
+└── subjects.txt
 ```
 
-## 4. Build the Docker / Apptainer image
+## 4. Build or pull the Docker / Apptainer image
 
-To build the image (in Docker or Apptainer), you have the following options:
+To obtain the image (in Docker or Apptainer), you have the following options:
 
 - Use the image from Docker Hub
 - Build the image from source
@@ -157,33 +151,38 @@ apptainer build enigma-pd-wml.sif docker-archive:enigma-pd-wml.tar
 
 ## 5. Run the container
 
-Below are various ways to run the container. For each, make sure you run the command from the top level of the
-directory you made in the ['Create standard directory structure' section](#3-create-standard-directory-structure).
-Note [there are some options](#options) you can add to the end of the docker/apptainer command.
+Below are various ways to run the container. For each, make sure you run the command the top-level directory
+of your BIDS-structured data, e.g. the [`data` directory in this example folder structure](#2-convert-data-to-bids-format-if-required)
+
+Note [there are some options](#options) you can add to the end of the Docker / Apptainer command.
 
 If you encounter issues when running the pipeline, check the [output logs](#output-logs) for any errors.
 
 ### Via docker (using image from docker hub)
 
 ```bash
-docker run -v "$(pwd)":/home -v "$(pwd)"/code:/code -v "$(pwd)"/data:/data hamiedaharoon24/enigma-pd-wml
+docker run "$(pwd)":/data hamiedaharoon24/enigma-pd-wml
 ```
 
 ### Via docker (using image built from source)
 
 ```bash
-docker run -v "$(pwd)":/home -v "$(pwd)"/code:/code -v "$(pwd)"/data:/data enigma-pd-wml
+docker run -v "$(pwd)":/data enigma-pd-wml
 ```
 
-### Via apptainer
+### Via apptainer (using image built from source)
 
-You'll need to put the `.sif` file in the top level of the directory you made in the
-['Create standard directory structure' section](#3-create-standard-directory-structure), or provide the full path to
-its location.
+You'll need to put the `.sif` file same directory you run the `apptainer` command from,
+or provide the full path to its location.
+
+You should run this command from the directory **above** your top-level BIDS directory, e.g. within `cwd`
+if your data is in `cwd/data`.
 
 ```bash
-apptainer run --bind ${PWD}:/home --bind ${PWD}/code:/code --bind ${PWD}/data:/data enigma-pd-wml.sif
+apptainer run --bind ${PWD}/<data_dir>:/data enigma-pd-wml.sif
 ```
+
+replacing `<data_dir>` with the name of your top-level BIDS folder.
 
 ### Options
 
@@ -211,10 +210,41 @@ apptainer run --bind ${PWD}:/home --bind ${PWD}/code:/code --bind ${PWD}/data:/d
 
 ### Output images
 
-The main pipeline output will be written to a zip file (per subject) at
-`/data/UNet-pgs/subject-id/subject-id_results.zip`
+After running your analysis, your BIDS directory should have the following structure:
 
-This should contain six files within an `output` directory:
+```bash
+bids-data
+├── dataset_description.json
+├── enigma-pd-wml.log
+├── enigma-pd-wml-results.zip
+├── sub-1
+│   ├── ses-1
+│   │   ├── anat
+│   │   │   ├── sub-1_ses-1_FLAIR.nii.gz
+│   │   │   └── sub-1_ses-1_T1w.nii.gz
+│   │   └── derivatives
+│   │       └── enigma-pd-wml
+│   │           ├── input/
+│   │           ├── output/
+│   │           ├── sub-1_ses-1.log
+│   │           └── sub-1_ses-1_results.zip
+│   └── ses-2
+│       ├── anat
+│       │   ├── sub-1_ses-2_FLAIR.nii.gz
+│       │   └── sub-1_ses-2_T1w.nii.gz
+│       └── derivatives
+│           └── enigma-pd-wml
+│               ├── input/
+│               ├── output/
+│               ├── sub-1_ses-2.log
+│               └── sub-1_ses-2_results.zip
+```
+
+#### Session-level zip files
+
+The pipeline will generate multiple `.zip` files - one per session, e.g. `sub-1_ses-1_results.zip`.
+
+These zip files should contain six files:
 
 - `results2mni_lin.nii.gz`: WML segmentations linearly transformed to MNI space.
 
@@ -228,13 +258,25 @@ This should contain six files within an `output` directory:
 
 - `results2mni_nonlin_perivent.nii.gz`: WML segmentations (periventricular) non-linearly transformed to MNI space.
 
+#### Top-level zip file
+
+A top-level zip file will also be created (`enigma-pd-wml-results.zip`). This will contain all zip files for each session.
+
+**Please send this top-level zip file to the ENIGMA-PD Vasc team.**
+
+#### Intermediate files
+
+The pipeline generates several intermediate files. These are stored in the `derivatives/enigma-pd-wml/input` and
+`derivatives/enigma-pd-wml/output` folders of each session.
+
 ### Output logs
 
 Pipeline logs can be found at:
 
-- `/code/overall_log.txt`: contains minimal information about the initial pipeline setup.
+- `enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
 
-- `/code/subject_logs`: one log per subject, containing information about the various processing steps.
+- `enigma-pd-wml/<subject>_<session>.log`: one log per session; stored in the session's `derivatives folder`;
+  contains information about the various processing steps.
 
 ## Common issues
 
