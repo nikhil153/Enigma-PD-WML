@@ -138,12 +138,19 @@ repository.
 To run the analysis using Apptainer:
 
 ```bash
-apptainer run --bind "${PWD}":/data hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml:<tag>
+apptainer run --bind "${PWD}":/data library://hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml:<tag>
 ```
 
 where `<tag>` is the version of the image you would like to pull.
 
-Note, the image will be downloaded from Sylabs Cloud the first time you run a particular version of the
+It can sometime be slow to pull the image from Sylabs Cloud. If you would prefer to pull the Docker image
+from Docker Hub and build and run a local Apptainer image, you can run the following command:
+
+```bash
+apptainer run --bind "${PWD}":/data docker://hamiedaharoon24/enigma-pd-wml:<tag>
+```
+
+Note, the image will be downloaded from Sylabs Cloud (or Docker Hub) the first time you run a particular version of the
 image.
 
 ### Options
