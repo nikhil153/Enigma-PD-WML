@@ -305,7 +305,7 @@ function runAnalysis (){
 
    subject=$1
    session=$2
-   echo "Processing subject: ${subject} session: ${session}" >> ${data_path}/enigma-pd-wml.log
+   echo "Processing subject: ${subject} session: ${session}" >> ${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml.log
    echo subject : ${subject}
    echo session : ${session}
 
@@ -318,7 +318,7 @@ function runAnalysis (){
    echo
 
    # assign path for output data directory and create it (if it doesn't exist)
-   export data_outpath=${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/
+   export data_outpath=${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
    mkdir -p ${data_outpath}
    echo data_outpath : ${data_outpath}
 
@@ -389,7 +389,7 @@ function setupRunAnalysis(){
     sessions=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename)  #
     for session in $sessions; do
       subjects_sessions+=("${subject} ${session}")
-      mkdir -p ${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/
+      mkdir -p ${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
     done
   done < $subjects_list
 
@@ -400,15 +400,15 @@ function setupRunAnalysis(){
     for subject_session in "${subjects_sessions[@]}"; do
       subject=$(echo $subject_session | cut -d ' ' -f 1)
       session=$(echo $subject_session | cut -d ' ' -f 2)
-      runAnalysis $subject $session > "${data_path}/${subject}/${session}/derivatives/enigma-pd-wml/${subject}_${session}.log" 2>&1
+      runAnalysis $subject $session > "${data_path}/derivatives/enigma-pd-wml/${subject}/${session}/${subject}_${session}.log" 2>&1
     done
   else
     echo "Running in parallel with ${n} jobs"
     export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
-    printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' runAnalysis \{1\} \{2\} ">" "'${data_path}/{1}/{2}/derivatives/enigma-pd-wml/{1}_{2}.log'" "2>&1"
+    printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' runAnalysis \{1\} \{2\} ">" "'${data_path}/derivatives/enigma-pd-wml/{1}/{2}/{1}_{2}.log'" "2>&1"
   fi
 
-  zip -q enigma-pd-wml-results.zip ${data_path}/sub-*/ses-*/derivatives/enigma-pd-wml/sub-*_ses*_results.zip
+  zip -q ${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml-results.zip ${data_path}/derivatives/enigma-pd-wml/sub-*/ses-*/sub-*_ses*_results.zip
 
   echo
   echo =====================================================
@@ -423,8 +423,10 @@ function setupRunAnalysis(){
 
 # assign paths for code and input data directories, as well as overall log file
 export data_path=/data
-overall_log=${data_path}/enigma-pd-wml.log
+mkdir -p ${data_path}/derivatives/enigma-pd-wml/
+overall_log=${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml.log
 
 echo "Running analysis script"
-echo "See overall log at enigma-pd-wml.log and subject/session logs with the derivatives folders of each session"
+echo "See overall log at derivatives/enigma-pd-wml/enigma-pd-wml.log"
+echo "See logs for each session in their respective folders: derivatives/enigma-pd-wml/sub-*/ses-*/"
 setupRunAnalysis "$@" >> $overall_log 2>&1
