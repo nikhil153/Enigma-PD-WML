@@ -138,12 +138,19 @@ repository.
 To run the analysis using Apptainer:
 
 ```bash
-apptainer run --bind "${PWD}":/data hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml:<tag>
+apptainer run --bind "${PWD}":/data library://hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml:<tag>
 ```
 
 where `<tag>` is the version of the image you would like to pull.
 
-Note, the image will be downloaded from Sylabs Cloud the first time you run a particular version of the
+It can sometime be slow to pull the image from Sylabs Cloud. If you would prefer to pull the Docker image
+from Docker Hub and build and run a local Apptainer image, you can run the following command:
+
+```bash
+apptainer run --bind "${PWD}":/data docker://hamiedaharoon24/enigma-pd-wml:<tag>
+```
+
+Note, the image will be downloaded from Sylabs Cloud (or Docker Hub) the first time you run a particular version of the
 image.
 
 ### Options
@@ -216,11 +223,19 @@ These zip files should contain six files:
 
 - `results2min_lin_perivent.nii.gz`: WML segmentations (periventricular) linearly transformed to MNI space.
 
-- `results2mni_nonlin.nii.gz`: WML segmentations non-linearly transformed to MNI space.
+- `results2mni_nonlin.nii.gz`: WML segmentations non-linearly warped to MNI space.
 
-- `results2min_nonlin_deep.nii.gz`: WML segmentations (deep white matter) non-linearly transformed to MNI space.
+- `results2min_nonlin_deep.nii.gz`: WML segmentations (deep white matter) non-linearly warped to MNI space.
 
-- `results2mni_nonlin_perivent.nii.gz`: WML segmentations (periventricular) non-linearly transformed to MNI space.
+- `results2mni_nonlin_perivent.nii.gz`: WML segmentations (periventricular) non-linearly warped to MNI space.
+
+- `T1_biascorr_brain_to_MNI_lin.nii.gz`: T1 bias-corrected brain linearly transformed to MNI space.
+
+- `FLAIR_biascorr_brain_to_MNI_lin.nii.gz`: FLAIR bias-corrected brain linearly transformed to MNI space.
+
+- `T1_biascorr_brain_to_MNI_nonlin.nii.gz`: T1 bias-corrected brain non-linearly warped to MNI space.
+
+- `FLAIR_biascorr_brain_to_MNI_nonlin.nii.gz`: FLAIR bias-corrected brain non-linearly warped to MNI space.
 
 #### Top-level zip file
 
