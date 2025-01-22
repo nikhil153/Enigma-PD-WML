@@ -175,36 +175,38 @@ image.
 After running your analysis, your data directory should have the following structure:
 
 ```bash
-data
+bids-data
 ├── dataset_description.json
-├── enigma-pd-wml.log
-├── enigma-pd-wml-results.zip
-├── sub-1
-│   ├── ses-1
-│   │   ├── anat
-│   │   │   ├── sub-1_ses-1_FLAIR.nii.gz
-│   │   │   └── sub-1_ses-1_T1w.nii.gz
-│   │   └── derivatives
-│   │       └── enigma-pd-wml
-│   │           ├── input/
-│   │           ├── output/
-│   │           ├── sub-1_ses-1.log
-│   │           └── sub-1_ses-1_results.zip
-│   └── ses-2
-│       ├── anat
-│       │   ├── sub-1_ses-2_FLAIR.nii.gz
-│       │   └── sub-1_ses-2_T1w.nii.gz
-│       └── derivatives
-│           └── enigma-pd-wml
+├── derivatives
+│   └── enigma-pd-wml
+│       ├── enigma-pd-wml.log
+│       └── sub-1
+│           ├── ses-1
+│           │   ├── input/
+│           │   ├── output/
+│           │   ├── sub-1_ses-1.log
+│           │   └── sub-1_ses-1_results.zip
+│           └── ses-2
 │               ├── input/
 │               ├── output/
 │               ├── sub-1_ses-2.log
 │               └── sub-1_ses-2_results.zip
+├── sub-1
+│   ├── ses-1
+│   │   └── anat
+│   │       ├── sub-1_ses-1_FLAIR.nii.gz
+│   │       └── sub-1_ses-1_T1w.nii.gz
+│   └── ses-2
+│       └── anat
+│           ├── sub-1_ses-2_FLAIR.nii.gz
+│           └── sub-1_ses-2_T1w.nii.gz
+└── subjects.txt
 ```
 
 #### Session-level zip files
 
-The pipeline will generate multiple `.zip` files - one per session, e.g. `sub-1_ses-1_results.zip`.
+The pipeline will generate multiple `.zip` files - one per session, stored within the corresponding session
+sub-folder, e.g. `derivatives/enigma-pd-wml/sub-1/ses-1/sub-1_ses-1_results.zip`.
 
 These zip files should contain six files:
 
@@ -222,23 +224,24 @@ These zip files should contain six files:
 
 #### Top-level zip file
 
-A top-level zip file will also be created (`enigma-pd-wml-results.zip`). This will contain all zip files for each session.
+A top-level zip file will also be created (`derivatives/enigma-pd-wml/enigma-pd-wml-results.zip`). This will contain all
+zip files for each session.
 
 **Please send this top-level zip file to the ENIGMA-PD Vasc team.**
 
 #### Intermediate files
 
-The pipeline generates several intermediate files. These are stored in the `derivatives/enigma-pd-wml/input` and
-`derivatives/enigma-pd-wml/output` folders of each session.
+The pipeline generates several intermediate files. These are stored in the `derivatives/enigma-pd-wml/<subject>/<session>/input`
+and `derivatives/enigma-pd-wml/<subject>/<session>/output` folders.
 
 ### Output logs
 
 Pipeline logs can be found at:
 
-- `enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
+- `derivatives/enigma-pd-wml/enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
 
-- `enigma-pd-wml/<subject>_<session>.log`: one log per session; stored in the session's `derivatives folder`;
-  contains information about the various processing steps.
+- `derivatives/enigma-pd-wml/<subject>/<session>/<subject>_<session>.log`: one log per session; contains information about
+  the various processing steps.
 
 ## Common issues
 
