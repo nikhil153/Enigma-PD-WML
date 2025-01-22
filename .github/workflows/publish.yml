@@ -61,7 +61,7 @@ jobs:
         run: |
           apptainer remote add --tokenfile ~/.apptainer/sylabs-token sylabs https://cloud.sylabs.io
 
-      - name: Build and push SIF image
+      - name: Build and push Apptainer image
         run: |
           TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1 | awk -F':' '{print $2}')
           apptainer build container.sif docker-daemon://${{ secrets.DOCKERHUB_USERNAME }}/enigma-pd-wml:$TAG
