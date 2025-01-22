@@ -209,6 +209,10 @@ function processOutputs(){
     "${data_outpath}"/output/results2mni_nonlin.nii.gz
     "${data_outpath}"/output/results2mni_nonlin_deep.nii.gz
     "${data_outpath}"/output/results2mni_nonlin_perivent.nii.gz
+    "${data_outpath}"/output/T1_biascorr_brain_to_MNI_lin.nii.gz
+    "${data_outpath}"/output/FLAIR_biascorr_brain_to_MNI_lin.nii.gz
+    "${data_outpath}"/output/T1_biascorr_brain_to_MNI_nonlin.nii.gz
+    "${data_outpath}"/output/FLAIR_biascorr_brain_to_MNI_nonlin.nii.gz
    )
    if [ "$overwrite" = false ] && allFilesExist "${output_files[@]}"
    then
@@ -232,6 +236,8 @@ function processOutputs(){
    cp ${data_outpath}/input/vent_dist_mapping/dwm_t1brain.nii.gz .
    cp ${data_outpath}/input/vent_dist_mapping/perivent_flairbrain.nii.gz .
    cp ${data_outpath}/input/vent_dist_mapping/dwm_flairbrain.nii.gz .
+   cp ${data_outpath}/input/t1-mni.anat/T1_biascorr_brain.nii.gz .
+   cp ${data_outpath}/input/flair-bet/flairvol2t1brain.nii.gz .
 
 
    tree ${data_outpath}/input/
@@ -279,6 +285,14 @@ function processOutputs(){
      -out results2mni_lin_deep \
      -paddingsize 0.0 -interp nearestneighbour -ref MNI152_T1_1mm_brain.nii.gz
 
+   flirt -in T1_biascorr_brain.nii.gz -applyxfm -init T1_to_MNI_lin.mat \
+     -out T1_biascorr_brain_to_MNI_lin \
+     -paddingsize 0.0 -interp trilinear -ref MNI152_T1_1mm_brain.nii.gz
+
+   flirt -in flairvol2t1brain.nii.gz -applyxfm -init T1_to_MNI_lin.mat \
+     -out FLAIR_biascorr_brain_to_MNI_lin \
+     -paddingsize 0.0 -interp trilinear -ref MNI152_T1_1mm_brain.nii.gz
+
 
    echo "STEP 05"
    # run FSL's applywarp tool to nonlinearly warp WML segmentations with MNI T1
@@ -293,6 +307,14 @@ function processOutputs(){
    applywarp --in=results2t1roi_deep.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=results2mni_nonlin_deep \
           --interp=nn --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+
+   applywarp --in=T1_biascorr_brain.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
+          --out=T1_biascorr_brain_to_MNI_nonlin \
+          --interp=trilinear --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+
+   applywarp --in=flairvol2t1brain.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
+          --out=FLAIR_biascorr_brain_to_MNI_nonlin \
+          --interp=trilinear --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
 
    echo all done!
    echo
@@ -347,7 +369,11 @@ function runAnalysis (){
    processOutputs
 
    cd ${data_outpath}/output
-   zip -q ../${subject}_${session}_results.zip results2mni_lin*.nii.gz results2mni_nonlin*.nii.gz
+   zip -q ../${subject}_${session}_results.zip \
+      results2mni_lin*.nii.gz \
+      results2mni_nonlin*.nii.gz \
+      T1_biascorr_brain_to_MNI_*lin.nii.gz \
+      FLAIR_biascorr_brain_to_MNI_*lin.nii.gz
 
 }
 
