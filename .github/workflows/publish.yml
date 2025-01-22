@@ -13,9 +13,15 @@ jobs:
     steps:
       - name: Increase disk space available for building images
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc "$AGENT_TOOLSDIRECTORY"
-          sudo docker image prune --all --force
-          sudo docker builder prune -a
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /usr/local/.ghcup \
+            /opt/ghc \
+            "$AGENT_TOOLSDIRECTORY" \
+            /usr/local/share/powershell \
+            /usr/share/swift \
+            /usr/lib/jvm || true
 
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -64,5 +70,5 @@ jobs:
       - name: Build and push Apptainer image
         run: |
           TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1 | awk -F':' '{print $2}')
-          apptainer build container.sif docker-daemon://${{ secrets.DOCKERHUB_USERNAME }}/enigma-pd-wml:$TAG
-          apptainer push -U container.sif library://${{ secrets.SYLABS_USERNAME }}/enigma-pd-wml/enigma-pd-wml:$TAG
+          apptainer build enigma-pd-wml.sif docker-daemon://${{ secrets.DOCKERHUB_USERNAME }}/enigma-pd-wml:$TAG
+          apptainer push -U enigma-pd-wml.sif library://${{ secrets.SYLABS_USERNAME }}/enigma-pd-wml/enigma-pd-wml:$TAG
