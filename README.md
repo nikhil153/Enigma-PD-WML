@@ -187,6 +187,7 @@ bids-data
 ├── derivatives
 │   └── enigma-pd-wml
 │       ├── enigma-pd-wml.log
+│       ├── enigma-pd-wml-results.zip
 │       └── sub-1
 │           ├── ses-1
 │           │   ├── input/
