@@ -64,6 +64,32 @@ This repository has a github actions workflow to automate uploading to
 - This will trigger the action to run and upload the code on the `main` branch to Docker Hub. Note: as the image is very
   large, this will take a while! (around 15 minutes)
 
+### Publishing to Sylabs Cloud
+
+We publish the Apptainer image to Sylabs Cloud. However, API access tokens to Sylabs Cloud only last for
+two weeks.
+
+If the token has expired, you will need to create a new one and add it as a repository secret.
+
+Instructions for @HamiedGH:
+
+#### 1. Create an API Access Token in Sylabs Cloud
+
+1. Log in to your account on [Sylabs Cloud](https://cloud.sylabs.io).
+2. Click on your profile icon in the top right corner and select "Access Tokens".
+3. Click on "Create Token".
+4. Enter a name for the token and click "Create".
+5. Copy the generated token. You will need this in the next step.
+
+#### 2. Add the token as a repository secret in GitHub
+
+1. Go to the [Enigma-PD-WML repository](https://github.com/UCL-ARC/Enigma-PD-WML) on GitHub.
+2. Click on the "Settings" tab.
+3. In the left sidebar, click on "Secrets and variables" and then "Actions".
+4. Click the edit buttion next to the `SYLABS_TOKEN` secret.
+5. Paste the token you copied from Sylabs Cloud into the "Secret" field.
+6. Click "Update secret".
+
 ## Linting setup (pre-commit)
 
 This repository has another github actions workflow to run various linting checks on pull requests / commits to `main`.
