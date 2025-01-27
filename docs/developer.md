@@ -48,7 +48,7 @@ apptainer run --bind "${PWD}"/data:/data enigma-pd-wml.sif
 
 Note, this requires your BIDS data is stored in the directory `Enigma-PD-WML/data`.
 
-## Making new releases to docker hub
+## Making new releases to docker hub and Sylabs Cloud
 
 This repository has a github actions workflow to automate uploading to
 [Docker Hub](https://hub.docker.com/r/hamiedaharoon24/enigma-pd-wml/tags) when a new release is made on github.
@@ -61,8 +61,8 @@ This repository has a github actions workflow to automate uploading to
 
 - Click the green 'Publish release' button at the bottom left.
 
-- This will trigger the action to run and upload the code on the `main` branch to Docker Hub. Note: as the image is very
-  large, this will take a while! (around 15 minutes)
+- This will trigger the action to run and upload the code on the `main` branch to Docker Hub and Sylabs Cloud. Note: as
+  the images are very large, this will take a while! (around 40 minutes)
 
 ### Publishing to Sylabs Cloud
 
