@@ -379,8 +379,10 @@ function runAnalysis (){
 
 function parseArguments() {
   n=1
+  subjects_file=""
+  subjects=()
   export overwrite=false
-  while getopts "n:o" opt; do
+  while getopts "n:of:s:" opt; do
     case ${opt} in
       n)
         n=${OPTARG}
@@ -388,6 +390,13 @@ function parseArguments() {
       o)
         echo "overwrite option enabled"
         overwrite=true
+        ;;
+      f)
+        subjects_file="${data_path}/${OPTARG}"
+        ;;
+      s)
+        IFS=',' read -r -a temp_subjects <<< "${OPTARG}"
+        subjects+=("${temp_subjects[@]}")
         ;;
       ?)
         echo "Invalid option: -${OPTARG}."
@@ -406,18 +415,33 @@ function setupRunAnalysis(){
 
   parseArguments "$@"
 
-  # Get the list of sessions for each subject
-  subjects_list=${data_path}/subjects.txt
-  echo "Obtaining list of subjects and sessions based on subjects in ${subjects_list}"
+  # Include subjects from file if provided
+  if [[ -n "$subjects_file" ]]; then
+    echo "Using subjects file: ${subjects_file}"
+    while IFS=$'\n' read -r subject; do
+      subjects+=("$subject")
+    done < "$subjects_file"
+  fi
+
+  if [[ ${#subjects[@]} -gt 0 ]]; then
+    # remove duplicates (subjects in both `subjects_file` and `subjects_list`)
+    subjects=($(echo "${subjects[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+  else
+    echo "No subjects file or list provided. Running analysis on all subjects."
+    # shellcheck disable=SC2011
+    subjects=($(ls -d ${data_path}/sub-* | xargs -n 1 basename))
+  fi
+
+  # Get sessions for selected subjects
   subjects_sessions=()
-  while IFS=$'\n' read -r subject; do
-    # shellcheck disable=SC2038
-    sessions=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename)  #
+  for subject in "${subjects[@]}"; do
+  # shellcheck disable=SC2038
+    sessions=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename)
     for session in $sessions; do
       subjects_sessions+=("${subject} ${session}")
       mkdir -p ${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
     done
-  done < $subjects_list
+  done
 
   # Run the analysis
   if [[ $n -eq 1 ]]
