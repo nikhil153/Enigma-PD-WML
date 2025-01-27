@@ -30,11 +30,9 @@ Setting up and running the pipeline requires the following steps, which are expl
 flowchart TD
     installation("`Install prerequisites`")
     convert("`Ensure data is in BIDS format`")
-    subjects("`Create a subjects.txt input file`")
     run("`Run the container with Docker / Apptainer`")
     installation --> convert
-    convert --> subjects
-    subjects --> run
+    convert --> run
 ```
 
 ## 1. Install prerequisites
@@ -76,32 +74,7 @@ data
 │           └───sub-1_ses-1_FLAIR.nii.gz
 ```
 
-## 3. Create `subjects.txt` file
-
-Inside your top-level BIDS directory (e.g. `data` in the above example structure), create a `subjects.txt` file that
-contains subject identifiers (one per line).
-
-The subject identifies **must** match the names of the corresponding subject folders, e.g. `sub-1`, `sub-2`.
-
-Your final file structure should look like below (for two example subject ids):
-
-```bash
-data
-├── sub-1
-│   └── ses-1
-│       └── anat
-│           ├── sub-1_ses-1_T1w.nii.gz
-│           └── sub-1_ses-1_FLAIR.nii.gz
-│
-├── sub-2
-│   └── ses-1
-│       └── anat
-│           ├── sub-1_ses-1_T1w.nii.gz
-│           └── sub-1_ses-1_FLAIR.nii.gz
-└── subjects.txt
-```
-
-## 4. Run the container
+## 3. Run the container
 
 >[!IMPORTANT]
 > When running the container, make sure you run the command from the top-level directory
@@ -155,25 +128,33 @@ image.
 
 ### Options
 
-- `-n` : the number of jobs to run in parallel.
+- `-n` : the number of jobs to run in parallel. Defaults to 1. See also potentials issues
+  of [increased memory usage](#tensorflow-memory-usage) when running in parallel.
 
-  By default (without `-n`), the pipeline will process your subjects sequentially on 1 core. With `-n` they will be
-  processed in parallel with `n` jobs. For example:
+- `-o` : overwrite existing intermediate files
 
-  ```bash
-  # Run with 5 jobs
-  -n 5
+  When this flag is set, the pipeline will run all steps of the pipeline, overwriting any previous output for a given
+  session.
+
+  When this flag is not set, the pipeline will re-use any existing output files, skipping steps that have previously been
+  completed. This is useful if, for example, the pipeline fails at a late stage and you want to run it again, without
+  having to re-run time-consuming earlier steps. This is the default behaviour.
+
+- `f` : Path to a file containing a list of subjects to target.
+
+  The path must be relative to your data directory, and the file must be within the `data/` directory or one of its
+  sub-directories. The file must contain one subject per line, e.g.
+
+  ```bash filename="subjects.txt"
+  sub-1
+  sub-2
+  sub-3
   ```
 
-  A good default value is the number of cores on your system, but be
-  [wary of increased memory usage](#tensorflow-memory-usage).
+- `s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
 
-- `-o` : whether to overwrite existing output files
-
-  By default (without `-o`), the pipeline will try to re-use any existing output files, skipping steps that are already
-  complete. This is useful if, for example, the pipeline fails at a late stage and you want to run it again, without
-  having to re-run time-consuming earlier steps. With `-o` the pipeline will run all steps again and ensure any previous
-  output is overwritten.
+> [!NOTE]
+> If both `-f` and `-s` are omitted, the pipeline will be run on all subjects.
 
 ## Pipeline output
 
@@ -182,7 +163,7 @@ image.
 After running your analysis, your data directory should have the following structure:
 
 ```bash
-bids-data
+data
 ├── dataset_description.json
 ├── derivatives
 │   └── enigma-pd-wml
@@ -208,7 +189,6 @@ bids-data
 │       └── anat
 │           ├── sub-1_ses-2_FLAIR.nii.gz
 │           └── sub-1_ses-2_T1w.nii.gz
-└── subjects.txt
 ```
 
 #### Session-level zip files
