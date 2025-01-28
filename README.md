@@ -104,27 +104,30 @@ image.
 
 ### Using Apptainer
 
-The image is available on Sylabs Cloud in the
-[hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml](https://cloud.sylabs.io/library/hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml)
-repository.
-
-To run the analysis using Apptainer:
+To run the analysis with Apptainer, you will first need to build an image based on the Docker image
+available on Docker Hub.
 
 ```bash
-apptainer run --bind "${PWD}":/data library://hh-enigmapd-2025/enigma-pd-wml/enigma-pd-wml:<tag>
+apptainer build enigma-pd-wml.sif docker://hamiedaharoon24/enigma-pd-wml:<tag>
 ```
 
 where `<tag>` is the version of the image you would like to pull.
 
-It can sometime be slow to pull the image from Sylabs Cloud. If you would prefer to pull the Docker image
-from Docker Hub and build and run a local Apptainer image, you can run the following command:
+This will create an `enigma-pd-wml.sif` image in your current working directory.
+
+To run the analysis:
 
 ```bash
-apptainer run --bind "${PWD}":/data docker://hamiedaharoon24/enigma-pd-wml:<tag>
+apptainer run --bind "${PWD}":/data enigma-pd-wml.sif
 ```
 
-Note, the image will be downloaded from Sylabs Cloud (or Docker Hub) the first time you run a particular version of the
-image.
+where `<tag>` is the version of the image you would like to pull.
+
+Note, this requires either:
+
+- the `enigma-pd-wml.sif` file is in your current working
+  directory (which should be your top-level BIDS data directory)
+- or, you provide the full path to the `.sif` file in the command
 
 ### Options
 
