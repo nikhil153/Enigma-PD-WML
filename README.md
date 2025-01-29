@@ -143,7 +143,7 @@ Note, this requires either:
   completed. This is useful if, for example, the pipeline fails at a late stage and you want to run it again, without
   having to re-run time-consuming earlier steps. This is the default behaviour.
 
-- `f` : Path to a file containing a list of subjects to target.
+- `-f` : Path to a file containing a list of subjects to target.
 
   The path must be relative to your data directory, and the file must be within the `data/` directory or one of its
   sub-directories. The file must contain one subject per line, e.g.
@@ -154,7 +154,7 @@ Note, this requires either:
   sub-3
   ```
 
-- `s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
+- `-s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
 
 > [!NOTE]
 > If both `-f` and `-s` are omitted, the pipeline will be run on all subjects.
