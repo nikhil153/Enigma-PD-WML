@@ -112,7 +112,7 @@ apptainer build enigma-pd-wml-<tag>.sif docker://hamiedaharoon24/enigma-pd-wml:<
 ```
 
 where `<tag>` is the version of the image you would like to pull. For example, to build an Apptainer
-image of version `0.7.0` of the Docker image:
+image from version `0.7.0` of the Docker image:
 
 ```bash
 apptainer build enigma-pd-wml-0.7.0.sif docker://hamiedaharoon24/enigma-pd-wml:0.7.0
@@ -120,7 +120,7 @@ apptainer build enigma-pd-wml-0.7.0.sif docker://hamiedaharoon24/enigma-pd-wml:0
 
 This will create an `enigma-pd-wml-0.7.0.sif` image file in your current working directory.
 
-To run the analysis (changeing the version number in the filename if necessary):
+To run the analysis (changing the version number in the filename if necessary):
 
 ```bash
 apptainer run --bind "${PWD}":/data enigma-pd-wml-0.7.0.sif
