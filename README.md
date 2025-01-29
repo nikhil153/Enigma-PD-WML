@@ -108,24 +108,27 @@ To run the analysis with Apptainer, you will first need to build an image based 
 available on Docker Hub.
 
 ```bash
-apptainer build enigma-pd-wml.sif docker://hamiedaharoon24/enigma-pd-wml:<tag>
+apptainer build enigma-pd-wml-<tag>.sif docker://hamiedaharoon24/enigma-pd-wml:<tag>
 ```
 
-where `<tag>` is the version of the image you would like to pull.
-
-This will create an `enigma-pd-wml.sif` image in your current working directory.
-
-To run the analysis:
+where `<tag>` is the version of the image you would like to pull. For example, to build an Apptainer
+image from version `0.7.0` of the Docker image:
 
 ```bash
-apptainer run --bind "${PWD}":/data enigma-pd-wml.sif
+apptainer build enigma-pd-wml-0.7.0.sif docker://hamiedaharoon24/enigma-pd-wml:0.7.0
 ```
 
-where `<tag>` is the version of the image you would like to pull.
+This will create an `enigma-pd-wml-0.7.0.sif` image file in your current working directory.
+
+To run the analysis (changing the version number in the filename if necessary):
+
+```bash
+apptainer run --bind "${PWD}":/data enigma-pd-wml-0.7.0.sif
+```
 
 Note, this requires either:
 
-- the `enigma-pd-wml.sif` file is in your current working
+- the `enigma-pd-wml-0.7.0.sif` file is in your current working
   directory (which should be your top-level BIDS data directory)
 - or, you provide the full path to the `.sif` file in the command
 
@@ -143,7 +146,7 @@ Note, this requires either:
   completed. This is useful if, for example, the pipeline fails at a late stage and you want to run it again, without
   having to re-run time-consuming earlier steps. This is the default behaviour.
 
-- `f` : Path to a file containing a list of subjects to target.
+- `-f` : Path to a file containing a list of subjects to target.
 
   The path must be relative to your data directory, and the file must be within the `data/` directory or one of its
   sub-directories. The file must contain one subject per line, e.g.
@@ -154,7 +157,7 @@ Note, this requires either:
   sub-3
   ```
 
-- `s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
+- `-s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
 
 > [!NOTE]
 > If both `-f` and `-s` are omitted, the pipeline will be run on all subjects.
