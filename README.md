@@ -202,7 +202,7 @@ data
 The pipeline will generate multiple `.zip` files - one per session, stored within the corresponding session
 sub-folder, e.g. `derivatives/enigma-pd-wml/sub-1/ses-1/sub-1_ses-1_results.zip`.
 
-These zip files should contain six files:
+These zip files should contain 10 files:
 
 - `results2mni_lin.nii.gz`: WML segmentations linearly transformed to MNI space.
 

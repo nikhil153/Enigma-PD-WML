@@ -270,6 +270,14 @@ function processOutputs(){
    fslmaths results2flairfullfov.nii.gz -mul perivent_flairbrain.nii.gz results2flairfullfov_perivent
    fslmaths results2flairfullfov.nii.gz -mul dwm_flairbrain.nii.gz results2flairfullfov_deep
 
+   # run FSL's flirt tool to transform/align WML periventricular and deep white matter portions with full-fov T1
+   flirt -in results2t1roi_perivent.nii.gz -applyxfm -init T1_roi2nonroi.mat \
+     -out results2t1fullfov_perivent \
+     -paddingsize 0.0 -interp nearestneighbour -ref T1_fullfov.nii.gz
+
+   flirt -in results2t1roi_deep.nii.gz -applyxfm -init T1_roi2nonroi.mat \
+     -out results2t1fullfov_deep \
+     -paddingsize 0.0 -interp nearestneighbour -ref T1_fullfov.nii.gz
 
    echo "STEP 04"
    # run FSL's flirt tool to linearly transform/align WML segmentations with MNI T1
