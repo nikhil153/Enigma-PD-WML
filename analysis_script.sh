@@ -238,6 +238,7 @@ function processOutputs(){
    cp ${data_outpath}/input/vent_dist_mapping/dwm_flairbrain.nii.gz .
    cp ${data_outpath}/input/t1-mni.anat/T1_biascorr_brain.nii.gz .
    cp ${data_outpath}/input/flair-bet/flairvol2t1brain.nii.gz .
+   cp ${data_outpath}/input/flair-bet/flairbrain2t1brain.nii.gz .
 
 
    tree ${data_outpath}/input/
@@ -245,6 +246,11 @@ function processOutputs(){
    # copy MNI T1 template images here
    cp ${FSLDIR}/data/standard/MNI152_T1_1mm.nii.gz .
    cp ${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz .
+
+   # copy MNI white matter tract and striatal connectivity atlases here
+   cp ${FSLDIR}/data/atlases/JHU/JHU-ICBM-labels-1mm.nii.gz .
+   cp ${FSLDIR}/data/atlases/Striatum/striatum-con-label-thr50-7sub-1mm.nii.gz .
+
 
    echo "STEP 01"
    # run FSL's flirt tool to transform/align WML segmentations from UNets-pgs with roi-cropped T1
@@ -297,7 +303,7 @@ function processOutputs(){
      -out T1_biascorr_brain_to_MNI_lin \
      -paddingsize 0.0 -interp trilinear -ref MNI152_T1_1mm_brain.nii.gz
 
-   flirt -in flairvol2t1brain.nii.gz -applyxfm -init T1_to_MNI_lin.mat \
+   flirt -in flairbrain2t1brain.nii.gz -applyxfm -init T1_to_MNI_lin.mat \
      -out FLAIR_biascorr_brain_to_MNI_lin \
      -paddingsize 0.0 -interp trilinear -ref MNI152_T1_1mm_brain.nii.gz
 
@@ -306,23 +312,60 @@ function processOutputs(){
    # run FSL's applywarp tool to nonlinearly warp WML segmentations with MNI T1
    applywarp --in=results2t1roi.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=results2mni_nonlin \
-          --interp=nn --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+          --interp=nn --ref=MNI152_T1_1mm_brain.nii.gz
 
    applywarp --in=results2t1roi_perivent.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=results2mni_nonlin_perivent \
-          --interp=nn --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+          --interp=nn --ref=MNI152_T1_1mm_brain.nii.gz
 
    applywarp --in=results2t1roi_deep.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=results2mni_nonlin_deep \
-          --interp=nn --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+          --interp=nn --ref=MNI152_T1_1mm_brain.nii.gz
 
    applywarp --in=T1_biascorr_brain.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=T1_biascorr_brain_to_MNI_nonlin \
-          --interp=trilinear --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+          --interp=trilinear --ref=MNI152_T1_1mm_brain.nii.gz
 
    applywarp --in=flairvol2t1brain.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=FLAIR_biascorr_brain_to_MNI_nonlin \
-          --interp=trilinear --ref=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
+          --interp=trilinear --ref=MNI152_T1_1mm_brain.nii.gz
+
+
+   echo "STEP 06"
+   # run FSL's invwarp and then applywarp tools to nonlinearly warp
+   # FSL's JHU white matter tract and striatal connectivity atlases from MNI to T1
+   # and multiply with WML segmentations to obtain tract location maps
+   invwarp --ref=T1_roi.nii.gz --warp=T1_to_MNI_nonlin_coeff \
+      --out=T1_to_MNI_nonlin_inv_coeff
+
+   applywarp --in=JHU-ICBM-labels-1mm.nii.gz --warp=T1_to_MNI_nonlin_inv_coeff \
+      --out=JHU-ICBM-labels-1mm_2t1roi \
+      --interp=nn --ref=T1_roi.nii.gz
+
+   applywarp --in=striatum-con-label-thr50-7sub-1mm.nii.gz --warp=T1_to_MNI_nonlin_inv_coeff \
+      --out=striatum-con-label-thr50-7sub-1mm_2t1roi \
+      --interp=nn --ref=T1_roi.nii.gz
+
+   fslmaths results2t1roi.nii.gz -mul JHU-ICBM-labels-1mm_2t1roi.nii.gz results2t1roi_jhuwmtracts
+   fslmaths results2t1roi.nii.gz -mul striatum-con-label-thr50-7sub-1mm_2t1roi.nii.gz results2t1roi_striatal
+
+   # run FSL's flirt and applywarp tools to linearly transform/align and nonlinearly warp
+   # tract location maps with MNI T1
+   flirt -in results2t1roi_jhuwmtracts.nii.gz -applyxfm -init T1_to_MNI_lin.mat \
+     -out results2mni_lin_jhuwmtracts \
+     -paddingsize 0.0 -interp nearestneighbour -ref MNI152_T1_1mm_brain.nii.gz
+
+   flirt -in results2t1roi_striatal.nii.gz -applyxfm -init T1_to_MNI_lin.mat \
+     -out results2mni_lin_striatal \
+     -paddingsize 0.0 -interp nearestneighbour -ref MNI152_T1_1mm_brain.nii.gz
+
+   applywarp --in=results2t1roi_jhuwmtracts.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
+          --out=results2mni_nonlin_jhuwmtracts \
+          --interp=nn --ref=MNI152_T1_1mm_brain.nii.gz
+
+   applywarp --in=results2t1roi_striatal.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
+          --out=results2mni_nonlin_striatal \
+          --interp=nn --ref=MNI152_T1_1mm_brain.nii.gz
 
    echo all done!
    echo
