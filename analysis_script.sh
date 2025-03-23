@@ -128,9 +128,16 @@ function ventDistMapping(){
 
    # run FSL's fslmaths tool to threshold the distance-from-ventricles maps to give perivantricular vs deep white matter masks
    fslmaths dist_from_vent_t1brain -uthr 10 -mas T1_biascorr_bianca_mask -bin perivent_t1brain
-   fslmaths dist_from_vent_t1brain -thr 10 -mas T1_biascorr_bianca_mask -bin dwm_t1brain
+   fslmaths dist_from_vent_t1brain -thr 10 -mas T1_biascorr_bianca_mask -bin dwm_t1brain_orig
    fslmaths dist_from_vent_flairbrain -uthr 10 -mas biancamask_trans2_flairbrain -bin perivent_flairbrain
-   fslmaths dist_from_vent_flairbrain -thr 10 -mas biancamask_trans2_flairbrain -bin dwm_flairbrain
+   fslmaths dist_from_vent_flairbrain -thr 10 -mas biancamask_trans2_flairbrain -bin dwm_flairbrain_orig
+
+   fslmaths perivent_t1brain.nii.gz -mul dwm_t1brain_orig.nii.gz perivent_dwm_t1_overlap
+   fslmaths dwm_t1brain_orig.nii.gz -sub perivent_dwm_t1_overlap.nii.gz dwm_t1brain
+   rm dwm_t1brain_orig.nii.gz
+   fslmaths perivent_flairbrain.nii.gz -mul dwm_flairbrain_orig.nii.gz perivent_dwm_flair_overlap
+   fslmaths dwm_flairbrain_orig.nii.gz -sub perivent_dwm_flair_overlap.nii.gz dwm_flairbrain
+   rm dwm_flairbrain_orig.nii.gz
 
    echo "ventricle distance mapping done"
    echo
