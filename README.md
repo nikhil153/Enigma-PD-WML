@@ -214,6 +214,11 @@ These zip files should contain 12 files:
 
 - `results2min_nonlin_deep.nii.gz`: WML segmentations (deep white matter) non-linearly warped to MNI space.
 
+- `results2mni_lin_jhuwmtracts.nii.gz`: WML segmentations (on jhu-icbm white matter tracts) linearly transformed to
+  MNI space.
+
+- `results2mni_lin_striatal.nii.gz`: WML segmentations (on striatal connections) linearly transformed to MNI space.
+
 - `results2mni_nonlin_perivent.nii.gz`: WML segmentations (periventricular) non-linearly warped to MNI space.
 
 - `results2mni_nonlin_jhuwmtracts.nii.gz`: WML segmentations (on jhu-icbm white matter tracts) non-linearly warped
