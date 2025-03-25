@@ -333,10 +333,9 @@ function processOutputs(){
           --out=T1_biascorr_brain_to_MNI_nonlin \
           --interp=trilinear --ref=MNI152_T1_1mm_brain.nii.gz
 
-   applywarp --in=flairvol2t1brain.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
+   applywarp --in=flairbrain2t1brain.nii.gz --warp=T1_to_MNI_nonlin_coeff.nii.gz \
           --out=FLAIR_biascorr_brain_to_MNI_nonlin \
           --interp=trilinear --ref=MNI152_T1_1mm_brain.nii.gz
-
 
    echo "STEP 06"
    # run FSL's invwarp and then applywarp tools to nonlinearly warp
