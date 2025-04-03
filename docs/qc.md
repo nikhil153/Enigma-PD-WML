@@ -13,12 +13,16 @@ This step is to ensure accurate WML maps have been created.
 
 Examples of well segmented FLAIR images:
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
-  <img src="./images/well-segmented.png" width="600">
+  <img src="./images/well-segmented.png" width="600" alt="well segmented">
 </p>
+<!-- markdownlint-enable MD033 -->
 
 Examples of poorly segmented FLAIR images: Missed WMLs highlighted with blue arrows.
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
-  <img src="images/poorly-segmented.png" width="600">
+  <img src="images/poorly-segmented.png" width="600" alt="poorly segmented">
 </p>
+<!-- markdownlint-enable MD033 -->
