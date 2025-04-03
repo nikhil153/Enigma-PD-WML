@@ -53,7 +53,7 @@ If you want to use Apptainer instead, then follow the
 <!-- markdownlint-disable MD028/no-blanks-blockquote -->
 > [!NOTE]
 > We recommend you convert your data to BIDS format before running the pipeline. If you prefer not to convert your data
-> to BIDS, you can [run the pipeline on non-BIDS data](./docs/non-bids-data).
+> to BIDS, you can [run the pipeline on non-BIDS data](./docs/non-bids-data.md).
 
 If your data isn't structured in BIDS format, we recommend you use [Nipoppy](https://nipoppy.readthedocs.io)
 to restructure your into the required format.
