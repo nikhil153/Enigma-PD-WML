@@ -34,8 +34,8 @@ you would create the following CSV file:
 
 ```csv
 flair,t1,output
-subject-1/flair.nii.gz,subject-1/t1.nii.gz,enigma-wml/subject-1/subject-1
-subject-2/flair.nii.gz,subject-2/t1.nii.gz,enigma-wml/subject-2/subject-2
+subject-1/flair.nii.gz,subject-1/t1.nii.gz,enigma-pd-wml/subject-1/subject-1
+subject-2/flair.nii.gz,subject-2/t1.nii.gz,enigma-pd-wml/subject-2/subject-2
 ```
 
 > [!NOTE]
@@ -46,8 +46,8 @@ subject-2/flair.nii.gz,subject-2/t1.nii.gz,enigma-wml/subject-2/subject-2
 <!-- markdownlint-disable MD028/no-blanks-blockquote -->
 > [!WARNING]
 > The output files must be stored in separate directories for each subject. For example, setting the above outputs files
-> to instead be `enigma-wml/subject-1` and `enigma-wml/subject-2` would fail, because outputs for both subjects
-> would be written to the `enigma-wml` directory.
+> to instead be `enigma-pd-wml/subject-1` and `enigma-pd-wml/subject-2` would fail, because outputs for both subjects
+> would be written to the `enigma-pd-wml` directory.
 
 ## Run the pipeline
 
@@ -76,7 +76,7 @@ data
 │   ├── flair.nii.gz
 │   └── t1.nii.gz
 │
-├── enigma-wml
+├── enigma-pd-wml
 │   ├── subject-1
 │   │   ├── subject-1.zip
 │   │   ├── subject-1.log
@@ -90,12 +90,12 @@ data
 ```
 
 The [session-level zip files](../README.md#session-level-zip-files) are stored in
-`data/enigma-wml/subject-1/subject-1/subject-1.zip` and `data/enigma-wml/subject-1/subject-2/subject-2.zip`. These are
+`data/enigma-pd-wml/subject-1/subject-1/subject-1.zip` and `data/enigma-pd-wml/subject-1/subject-2/subject-2.zip`. These are
 the files you will need to send to the ENIGMA-PD Vasc team.
 
 The [intermediate files](../README.md#intermediate-files) are stored in the
-`data/enigma-wml/subject-1/subject-1/input/` and `data/enigma-wml/subject-1/subject-1/output/` directories for
+`data/enigma-pd-wml/subject-1/subject-1/input/` and `data/enigma-pd-wml/subject-1/subject-1/output/` directories for
 `subject-1` (and the corresponding directories for `subject-2`).
 
 The top-level [log file](../README.md#output-logs) is stored in `data/enigma-pd-wml.log`, and the are stored in
-`data/enigma-wml/subject-1/subject-1/subject-1.zip` and `data/enigma-wml/subject-1/subject-2/subject-2.zip`.
+`data/enigma-pd-wml/subject-1/subject-1/subject-1.zip` and `data/enigma-pd-wml/subject-1/subject-2/subject-2.zip`.
