@@ -90,8 +90,8 @@ data
 ```
 
 The [session-level zip files](../README.md#session-level-zip-files) are stored in
-`data/enigma-pd-wml/subject-1/subject-1/subject-1.zip` and `data/enigma-pd-wml/subject-1/subject-2/subject-2.zip`. These are
-the files you will need to send to the ENIGMA-PD Vasc team.
+`data/enigma-pd-wml/subject-1/subject-1/subject-1.zip` and `data/enigma-pd-wml/subject-1/subject-2/subject-2.zip`. These
+are the files you will need to send to the ENIGMA-PD Vasc team.
 
 The [intermediate files](../README.md#intermediate-files) are stored in the
 `data/enigma-pd-wml/subject-1/subject-1/input/` and `data/enigma-pd-wml/subject-1/subject-1/output/` directories for
