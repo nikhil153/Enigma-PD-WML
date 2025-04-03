@@ -382,24 +382,18 @@ function runAnalysis (){
    # so set them again here
    set -euo pipefail
 
-   subject=$1
-   session=$2
-   echo "Processing subject: ${subject} session: ${session}" >> ${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml.log
-   echo subject : ${subject}
-   echo session : ${session}
+   flair_fn=$1
+   t1_fn=$2
+   export data_outpath=$3
 
-   # search full paths and filenames for input T1 and FLAIR images in nifti format
-   t1_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_T1w.nii.gz)
-   flair_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_FLAIR.nii.gz)
-
-   echo t1_fn    : ${t1_fn}
+   echo "Processing session with:"
    echo flair_fn : ${flair_fn}
+   echo t1_fn    : ${t1_fn}
+   echo data_outpath : ${data_outpath}
    echo
 
    # assign path for output data directory and create it (if it doesn't exist)
-   export data_outpath=${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
    mkdir -p ${data_outpath}
-   echo data_outpath : ${data_outpath}
 
    # change into output directory and create input and output subdirectories
    # directories are required by flair
@@ -426,20 +420,20 @@ function runAnalysis (){
    processOutputs
 
    cd ${data_outpath}/output
-   zip -q ../${subject}_${session}_results.zip \
+   zip -q ../session-results.zip \
       results2mni_lin*.nii.gz \
       results2mni_nonlin*.nii.gz \
       T1_biascorr_brain_to_MNI_*lin.nii.gz \
       FLAIR_biascorr_brain_to_MNI_*lin.nii.gz
-
 }
 
 function parseArguments() {
   n=1
   subjects_file=""
+  csv_file=""
   subjects=()
   export overwrite=false
-  while getopts "n:of:s:" opt; do
+  while getopts "n:of:s:l:" opt; do
     case ${opt} in
       n)
         n=${OPTARG}
@@ -454,6 +448,9 @@ function parseArguments() {
       s)
         IFS=',' read -r -a temp_subjects <<< "${OPTARG}"
         subjects+=("${temp_subjects[@]}")
+        ;;
+      l)
+        csv_file="${OPTARG}"
         ;;
       ?)
         echo "Invalid option: -${OPTARG}."
@@ -472,47 +469,65 @@ function setupRunAnalysis(){
 
   parseArguments "$@"
 
-  # Include subjects from file if provided
-  if [[ -n "$subjects_file" ]]; then
-    echo "Using subjects file: ${subjects_file}"
-    while IFS=$'\n' read -r subject; do
-      subjects+=("$subject")
-    done < "$subjects_file"
-  fi
-
-  if [[ ${#subjects[@]} -gt 0 ]]; then
-    # remove duplicates (subjects in both `subjects_file` and `subjects_list`)
-    subjects=($(echo "${subjects[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+  if [[ -n "$csv_file" ]]; then
+    echo "Using CSV file: ${csv_file}"
+    while IFS=',' read -r flair_fn t1_fn output_dir; do
+      if [[ "$flair_fn" != "flair" ]]; then # Skip header row
+        mkdir -p "$output_dir"
+        runAnalysis "$flair_fn" "$t1_fn" "$output_dir" > "${output_dir}/enigma-pd-wml-session.log" 2>&1
+      fi
+    done < "$csv_file"
   else
-    echo "No subjects file or list provided. Running analysis on all subjects."
-    # shellcheck disable=SC2011
-    subjects=($(ls -d ${data_path}/sub-* | xargs -n 1 basename))
-  fi
+    # Include subjects from file if provided
+    if [[ -n "$subjects_file" ]]; then
+      echo "Using subjects file: ${subjects_file}"
+      while IFS=$'\n' read -r subject; do
+        subjects+=("$subject")
+      done < "$subjects_file"
+    fi
 
-  # Get sessions for selected subjects
-  subjects_sessions=()
-  for subject in "${subjects[@]}"; do
-  # shellcheck disable=SC2038
-    sessions=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename)
-    for session in $sessions; do
-      subjects_sessions+=("${subject} ${session}")
-      mkdir -p ${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
-    done
-  done
+    if [[ ${#subjects[@]} -gt 0 ]]; then
+      # remove duplicates (subjects in both `subjects_file` and `subjects_list`)
+      subjects=($(echo "${subjects[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    else
+      echo "No subjects file or list provided. Running analysis on all subjects."
+      # shellcheck disable=SC2011
+      subjects=($(ls -d ${data_path}/sub-* | xargs -n 1 basename))
+    fi
 
-  # Run the analysis
-  if [[ $n -eq 1 ]]
-  then
-    echo "Running sequentially on 1 core"
-    for subject_session in "${subjects_sessions[@]}"; do
-      subject=$(echo $subject_session | cut -d ' ' -f 1)
-      session=$(echo $subject_session | cut -d ' ' -f 2)
-      runAnalysis $subject $session > "${data_path}/derivatives/enigma-pd-wml/${subject}/${session}/${subject}_${session}.log" 2>&1
+    # Get sessions for selected subjects
+    subjects_sessions=()
+    for subject in "${subjects[@]}"; do
+    # shellcheck disable=SC2038
+      sessions=$(find ${data_path}/${subject}/ses-*/anat/${subject}_ses-*_T1w.nii.gz | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename)
+      for session in $sessions; do
+        subjects_sessions+=("${subject} ${session}")
+        mkdir -p ${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
+      done
     done
-  else
-    echo "Running in parallel with ${n} jobs"
-    export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
-    printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' runAnalysis \{1\} \{2\} ">" "'${data_path}/derivatives/enigma-pd-wml/{1}/{2}/{1}_{2}.log'" "2>&1"
+
+    # Run the analysis
+    if [[ $n -eq 1 ]]
+    then
+      echo "Running sequentially on 1 core"
+      for subject_session in "${subjects_sessions[@]}"; do
+        subject=$(echo $subject_session | cut -d ' ' -f 1)
+        session=$(echo $subject_session | cut -d ' ' -f 2)
+        t1_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_T1w.nii.gz)
+        flair_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_FLAIR.nii.gz)
+        data_outpath=${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
+        runAnalysis "$flair_fn" "$t1_fn" "$data_outpath" > "${data_outpath}/${subject}_${session}.log" 2>&1
+      done
+    else
+      echo "Running in parallel with ${n} jobs"
+      export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
+      printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' \
+        runAnalysis \
+        "$(find ${data_path}/{1}/{2}/anat/{1}_{2}_FLAIR.nii.gz)" \
+        "$(find ${data_path}/{1}/{2}/anat/{1}_{2}_T1w.nii.gz)" \
+        "${data_path}/derivatives/enigma-pd-wml/{1}/{2}" \
+        ">" "'${data_path}/derivatives/enigma-pd-wml/{1}/{2}/{1}_{2}.log'" "2>&1"
+    fi
   fi
 
   zip -q ${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml-results.zip ${data_path}/derivatives/enigma-pd-wml/sub-*/ses-*/sub-*_ses*_results.zip
@@ -525,13 +540,12 @@ function setupRunAnalysis(){
   echo
   echo Thank you!
   echo
-
 }
 
 # assign paths for code and input data directories, as well as overall log file
 export data_path=/data
 mkdir -p ${data_path}/derivatives/enigma-pd-wml/
-overall_log=${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml.log
+export overall_log=${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml.log
 
 echo "Running analysis script"
 echo "See overall log at derivatives/enigma-pd-wml/enigma-pd-wml.log"
