@@ -15,10 +15,10 @@ function allFilesExist(){
 }
 
 function fslAnat(){
-   cd ${data_outpath}/input
+   cd ${data_outdir}/input
 
    # if all output files exist, skip rest of function
-   anat_dir=${data_outpath}/input/t1-mni.anat/
+   anat_dir=${data_outdir}/input/t1-mni.anat/
    output_files=(
     "${anat_dir}"/T1_biascorr_brain.nii.gz
     "${anat_dir}"/T1_biascorr.nii.gz
@@ -37,7 +37,7 @@ function fslAnat(){
    fi
 
    # run FSL's fsl_anat tool on the input T1 image, with outputs
-   # saved to a new subdirectory ${data_outpath}/input/t1-mni.anat
+   # saved to a new subdirectory ${data_outdir}/input/t1-mni.anat
    echo running fsl_anat on t1 in ${anat_dir}
    # flags this will stop fsl_anat going through unnecessary steps and generating outputs we don’t use.
    fsl_anat -o t1-mni -i ./t1vol_orig.nii.gz --nosubcortseg --clobber
@@ -48,7 +48,7 @@ function fslAnat(){
 
 function flairPrep(){
    # create new subdirectory to pre-process input FLAIR image
-   flair_dir=${data_outpath}/input/flair-bet
+   flair_dir=${data_outdir}/input/flair-bet
    mkdir -p ${flair_dir}
    cd ${flair_dir}
 
@@ -89,7 +89,7 @@ function flairPrep(){
 
 function ventDistMapping(){
    # create new subdirectory to create distance map from ventricles in order to determine periventricular vs deep white matter
-   vent_dir=${data_outpath}/input/vent_dist_mapping
+   vent_dir=${data_outdir}/input/vent_dist_mapping
    mkdir -p ${vent_dir}
    cd ${vent_dir}
 
@@ -106,7 +106,7 @@ function ventDistMapping(){
         return
    fi
 
-   # copy required images and transformation/warp coefficients from ${data_outpath}/input/t1-mni.anat here
+   # copy required images and transformation/warp coefficients from ${data_outdir}/input/t1-mni.anat here
    cp ../t1-mni.anat/T1_biascorr.nii.gz .
    cp ../t1-mni.anat/T1_biascorr_brain.nii.gz .
    cp ../t1-mni.anat/T1_fast_pve_0.nii.gz .
@@ -145,13 +145,13 @@ function ventDistMapping(){
 
 function prepImagesForUnet(){
    # change one directory up
-   cd ${data_outpath}/input
+   cd ${data_outdir}/input
 
    # if all output files exist, skip rest of function
    output_files=(
-    "${data_outpath}"/input/T1.nii.gz
-    "${data_outpath}"/input/FLAIR.nii.gz
-    "${data_outpath}"/input/T1_croppedmore2roi.mat
+    "${data_outdir}"/input/T1.nii.gz
+    "${data_outdir}"/input/FLAIR.nii.gz
+    "${data_outdir}"/input/T1_croppedmore2roi.mat
    )
    if [ "$overwrite" = false ] && allFilesExist "${output_files[@]}"
    then
@@ -183,11 +183,11 @@ function prepImagesForUnet(){
 
 function unetsPgs(){
    # change one directory up
-   cd ${data_outpath}
+   cd ${data_outdir}
 
    # if all output files exist, skip rest of function
    output_files=(
-    "${data_outpath}"/output/results.nii.gz
+    "${data_outdir}"/output/results.nii.gz
    )
    if [ "$overwrite" = false ] && allFilesExist "${output_files[@]}"
    then
@@ -196,7 +196,7 @@ function unetsPgs(){
    fi
 
    # run UNets-pgs in Singularity
-   echo running UNets-pgs Singularity in ${data_outpath}
+   echo running UNets-pgs Singularity in ${data_outdir}
 
    /WMHs_segmentation_PGS.sh T1.nii.gz FLAIR.nii.gz results.nii.gz ./input ./output
 
@@ -206,20 +206,20 @@ function unetsPgs(){
 
 function processOutputs(){
    # change into output directory
-   cd ${data_outpath}/output
+   cd ${data_outdir}/output
 
    # if all output files exist, skip rest of function
    output_files=(
-    "${data_outpath}"/output/results2mni_lin_deep.nii.gz
-    "${data_outpath}"/output/results2mni_lin.nii.gz
-    "${data_outpath}"/output/results2mni_lin_perivent.nii.gz
-    "${data_outpath}"/output/results2mni_nonlin.nii.gz
-    "${data_outpath}"/output/results2mni_nonlin_deep.nii.gz
-    "${data_outpath}"/output/results2mni_nonlin_perivent.nii.gz
-    "${data_outpath}"/output/T1_biascorr_brain_to_MNI_lin.nii.gz
-    "${data_outpath}"/output/FLAIR_biascorr_brain_to_MNI_lin.nii.gz
-    "${data_outpath}"/output/T1_biascorr_brain_to_MNI_nonlin.nii.gz
-    "${data_outpath}"/output/FLAIR_biascorr_brain_to_MNI_nonlin.nii.gz
+    "${data_outdir}"/output/results2mni_lin_deep.nii.gz
+    "${data_outdir}"/output/results2mni_lin.nii.gz
+    "${data_outdir}"/output/results2mni_lin_perivent.nii.gz
+    "${data_outdir}"/output/results2mni_nonlin.nii.gz
+    "${data_outdir}"/output/results2mni_nonlin_deep.nii.gz
+    "${data_outdir}"/output/results2mni_nonlin_perivent.nii.gz
+    "${data_outdir}"/output/T1_biascorr_brain_to_MNI_lin.nii.gz
+    "${data_outdir}"/output/FLAIR_biascorr_brain_to_MNI_lin.nii.gz
+    "${data_outdir}"/output/T1_biascorr_brain_to_MNI_nonlin.nii.gz
+    "${data_outdir}"/output/FLAIR_biascorr_brain_to_MNI_nonlin.nii.gz
    )
    if [ "$overwrite" = false ] && allFilesExist "${output_files[@]}"
    then
@@ -227,28 +227,28 @@ function processOutputs(){
         return
    fi
 
-   echo processing outputs in ${data_outpath}/output/
+   echo processing outputs in ${data_outdir}/output/
 
    echo "copy required images"
-   # copy required images and transformation/warp coefficients from ${data_outpath}/input here, renaming T1 and FLAIR
-   cp ${data_outpath}/input/T1_croppedmore2roi.mat .
-   cp ${data_outpath}/input/t1-mni.anat/T1.nii.gz T1_roi.nii.gz
-   cp ${data_outpath}/input/t1-mni.anat/T1_fullfov.nii.gz .
-   cp ${data_outpath}/input/t1-mni.anat/T1_to_MNI_lin.mat .
-   cp ${data_outpath}/input/t1-mni.anat/T1_to_MNI_nonlin_coeff.nii.gz .
-   cp ${data_outpath}/input/t1-mni.anat/T1_roi2nonroi.mat .
-   cp ${data_outpath}/input/flair-bet/flairbrain2t1brain_inv.mat .
-   cp ${data_outpath}/input/flair-bet/flairvol.nii.gz FLAIR_orig.nii.gz
-   cp ${data_outpath}/input/vent_dist_mapping/perivent_t1brain.nii.gz .
-   cp ${data_outpath}/input/vent_dist_mapping/dwm_t1brain.nii.gz .
-   cp ${data_outpath}/input/vent_dist_mapping/perivent_flairbrain.nii.gz .
-   cp ${data_outpath}/input/vent_dist_mapping/dwm_flairbrain.nii.gz .
-   cp ${data_outpath}/input/t1-mni.anat/T1_biascorr_brain.nii.gz .
-   cp ${data_outpath}/input/flair-bet/flairvol2t1brain.nii.gz .
-   cp ${data_outpath}/input/flair-bet/flairbrain2t1brain.nii.gz .
+   # copy required images and transformation/warp coefficients from ${data_outdir}/input here, renaming T1 and FLAIR
+   cp ${data_outdir}/input/T1_croppedmore2roi.mat .
+   cp ${data_outdir}/input/t1-mni.anat/T1.nii.gz T1_roi.nii.gz
+   cp ${data_outdir}/input/t1-mni.anat/T1_fullfov.nii.gz .
+   cp ${data_outdir}/input/t1-mni.anat/T1_to_MNI_lin.mat .
+   cp ${data_outdir}/input/t1-mni.anat/T1_to_MNI_nonlin_coeff.nii.gz .
+   cp ${data_outdir}/input/t1-mni.anat/T1_roi2nonroi.mat .
+   cp ${data_outdir}/input/flair-bet/flairbrain2t1brain_inv.mat .
+   cp ${data_outdir}/input/flair-bet/flairvol.nii.gz FLAIR_orig.nii.gz
+   cp ${data_outdir}/input/vent_dist_mapping/perivent_t1brain.nii.gz .
+   cp ${data_outdir}/input/vent_dist_mapping/dwm_t1brain.nii.gz .
+   cp ${data_outdir}/input/vent_dist_mapping/perivent_flairbrain.nii.gz .
+   cp ${data_outdir}/input/vent_dist_mapping/dwm_flairbrain.nii.gz .
+   cp ${data_outdir}/input/t1-mni.anat/T1_biascorr_brain.nii.gz .
+   cp ${data_outdir}/input/flair-bet/flairvol2t1brain.nii.gz .
+   cp ${data_outdir}/input/flair-bet/flairbrain2t1brain.nii.gz .
 
 
-   tree ${data_outpath}/input/
+   tree ${data_outdir}/input/
 
    # copy MNI T1 template images here
    cp ${FSLDIR}/data/standard/MNI152_T1_1mm.nii.gz .
@@ -384,27 +384,26 @@ function runAnalysis (){
 
    flair_fn=$1
    t1_fn=$2
-   export data_outpath=$3
+   data_outfile=$3  # output file name relative to the /data directory
+   export data_outdir=$(dirname "${data_outfile}")
 
    echo "Processing session with:"
    echo flair_fn : ${flair_fn}
    echo t1_fn    : ${t1_fn}
-   echo data_outpath : ${data_outpath}
+   echo data_outfile : "${data_outfile}"
+   echo data_outdir : ${data_outdir}
    echo
-
-   # assign path for output data directory and create it (if it doesn't exist)
-   mkdir -p ${data_outpath}
 
    # change into output directory and create input and output subdirectories
    # directories are required by flair
-   cd ${data_outpath}
-   mkdir -p ${data_outpath}/input
-   mkdir -p ${data_outpath}/output
+   cd ${data_outdir}
+   mkdir -p ${data_outdir}/input
+   mkdir -p ${data_outdir}/output
 
-   # change into input directory ${data_outpath}/input
+   # change into input directory ${data_outdir}/input
    # flirt expects to be ran in the same dir (maybe able to do this
    # outside of dir, but paths would be long)
-   cd ${data_outpath}/input
+   cd ${data_outdir}/input
 
    # copy input T1 and FLAIR images here, renaming them
    # files need to be renamed otherwise overwritten when fslroi is called.
@@ -419,12 +418,13 @@ function runAnalysis (){
    unetsPgs
    processOutputs
 
-   cd ${data_outpath}/output
-   zip -q ../session-results.zip \
+   cd ${data_outdir}/output
+   zip -q "${data_outfile}" \
       results2mni_lin*.nii.gz \
       results2mni_nonlin*.nii.gz \
       T1_biascorr_brain_to_MNI_*lin.nii.gz \
       FLAIR_biascorr_brain_to_MNI_*lin.nii.gz
+
 }
 
 function parseArguments() {
@@ -450,7 +450,7 @@ function parseArguments() {
         subjects+=("${temp_subjects[@]}")
         ;;
       l)
-        csv_file="${OPTARG}"
+        csv_file="${data_path}/${OPTARG}"
         ;;
       ?)
         echo "Invalid option: -${OPTARG}."
@@ -471,12 +471,35 @@ function setupRunAnalysis(){
 
   if [[ -n "$csv_file" ]]; then
     echo "Using CSV file: ${csv_file}"
-    while IFS=',' read -r flair_fn t1_fn output_dir; do
-      if [[ "$flair_fn" != "flair" ]]; then # Skip header row
-        mkdir -p "$output_dir"
-        runAnalysis "$flair_fn" "$t1_fn" "$output_dir" > "${output_dir}/enigma-pd-wml-session.log" 2>&1
-      fi
-    done < "$csv_file"
+    echo "See logs for each session in their respective output folders"
+    if [[ $n -eq 1 ]]; then
+      echo "Running sequentially on 1 core"
+      while IFS=',' read -r flair_fn t1_fn data_outfile; do
+        if [[ "$flair_fn" != "flair" ]]; then # Skip header row
+          data_outdir=$(dirname "${data_path}/${data_outfile}")
+          mkdir -p ${data_outdir}
+          echo ${flair_fn}
+          echo ${t1_fn}
+          echo ${data_outdir}
+          runAnalysis "${data_path}/${flair_fn}" "${data_path}/${t1_fn}" "${data_path}/${data_outfile}.zip" > "${data_path}/${data_outfile}.log" 2>&1
+        fi
+      done < "$csv_file"
+    else
+      echo "Running in parallel with ${n} jobs"
+      while IFS=',' read -r flair_fn t1_fn data_outfile; do
+        if [[ "$flair_fn" != "flair" ]]; then # Skip header row
+          data_outdir=$(dirname "${data_path}/${data_outfile}")
+          mkdir -p ${data_outdir}
+        fi
+      done < "$csv_file"
+      export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist      
+      tail -n +2 "$csv_file" | parallel --jobs ${n} --colsep ',' \
+          runAnalysis \
+          "${data_path}/{1}" \
+          "${data_path}/{2}" \
+          "${data_path}/{3}.zip" \
+          ">" "'${data_path}/{3}.log'" "2>&1"
+    fi
   else
     # Include subjects from file if provided
     if [[ -n "$subjects_file" ]]; then
@@ -507,6 +530,8 @@ function setupRunAnalysis(){
     done
 
     # Run the analysis
+    echo
+    echo "See logs for each session in their respective folders: derivatives/enigma-pd-wml/sub-*/ses-*/"
     if [[ $n -eq 1 ]]
     then
       echo "Running sequentially on 1 core"
@@ -515,39 +540,28 @@ function setupRunAnalysis(){
         session=$(echo $subject_session | cut -d ' ' -f 2)
         t1_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_T1w.nii.gz)
         flair_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_FLAIR.nii.gz)
-        data_outpath=${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
-        runAnalysis "$flair_fn" "$t1_fn" "$data_outpath" > "${data_outpath}/${subject}_${session}.log" 2>&1
+        data_outdir=${data_path}/derivatives/enigma-pd-wml/${subject}/${session}
+        data_outfile=${data_path}/derivatives/enigma-pd-wml/${subject}/${session}/${subject}_${session}_results.zip
+        runAnalysis "$flair_fn" "$t1_fn" "$data_outfile" > "${data_outdir}/${subject}_${session}.log" 2>&1
       done
     else
       echo "Running in parallel with ${n} jobs"
       export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
       printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' \
         runAnalysis \
-        "$(find ${data_path}/\{1\}/\{2\}/anat/\{1\}_\{2\}_FLAIR.nii.gz)" \
-        "$(find ${data_path}/\{1\}/\{2\}/anat/\{1\}_\{2\}_T1w.nii.gz)" \
-        "${data_path}/derivatives/enigma-pd-wml/{1}/{2}" \
+        "${data_path}/{1}/{2}/anat/{1}_{2}_FLAIR.nii.gz" \
+        "${data_path}/{1}/{2}/anat/{1}_{2}_T1w.nii.gz" \
+        "${data_path}/derivatives/enigma-pd-wml/{1}/{2}/{1}_{2}.zip" \
         ">" "'${data_path}/derivatives/enigma-pd-wml/{1}/{2}/{1}_{2}.log'" "2>&1"
     fi
   fi
 
-  zip -q ${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml-results.zip ${data_path}/derivatives/enigma-pd-wml/sub-*/ses-*/sub-*_ses*_results.zip
-
-  echo
-  echo =====================================================
-  echo please send this zip file to the ENIGMA-PD-Vasc team!
-  echo enigma-pd-wml-results.zip
-  echo =====================================================
-  echo
-  echo Thank you!
-  echo
 }
 
 # assign paths for code and input data directories, as well as overall log file
 export data_path=/data
-mkdir -p ${data_path}/derivatives/enigma-pd-wml/
-export overall_log=${data_path}/derivatives/enigma-pd-wml/enigma-pd-wml.log
+echo "See overall log at enigma-pd-wml.log in your data directory"
+export overall_log=${data_path}/enigma-pd-wml.log
 
 echo "Running analysis script"
-echo "See overall log at derivatives/enigma-pd-wml/enigma-pd-wml.log"
-echo "See logs for each session in their respective folders: derivatives/enigma-pd-wml/sub-*/ses-*/"
 setupRunAnalysis "$@" >> $overall_log 2>&1
