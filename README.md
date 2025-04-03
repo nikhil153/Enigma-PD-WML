@@ -304,4 +304,15 @@ FSL is released under a 'free for non-commercial purposes license', and
 is bundled with third-party libraries 'released under a range of different open source licenses'.
 See the [FSL license](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/license) for full details.
 
-'
+## Contributors
+
+### Creators
+
+Drs Sarah Al-Bachari, Hamied Haroon, Robin Long, Kimberley Meecham and Paul Smith. With specialist input from Professor
+Neda Jahanshad, Dr Conor Owens-Walton and Miss Sunanda Somu and Dr Chris Vriend.
+
+### Acknowledgements and Thanks
+
+Academy of Medical Sciences and Professor Schrag for directly supporting the project.  The Centre for Advanced Research
+Computing at UCL. All members of the ENIGMA-PD core team. Professor Laura Parkes and the University of Manchester
+computing facilities.
