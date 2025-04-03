@@ -51,7 +51,7 @@ subject-2/flair.nii.gz,subject-2/t1.nii.gz,enigma-pd-wml/subject-2/subject-2
 
 ## Run the pipeline
 
-To run the pipeline, follow the [instructions for running the container](../README#3-run-the-container), and pass to
+To run the pipeline, follow the [instructions for running the container](../README.md#3-run-the-container), and pass to
 `-l` flag to the run command, specifying the relative. For example, to run with Docker:
 
 ```bash
