@@ -263,6 +263,10 @@ Pipeline logs can be found at:
 - `derivatives/enigma-pd-wml/<subject>/<session>/<subject>_<session>.log`: one log per session; contains information about
   the various processing steps.
 
+## Quality control
+
+See notes on [quality control](docs/qc.md) for the WML pipeline.
+
 ## Common issues
 
 ### Tensorflow memory usage
