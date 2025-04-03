@@ -523,8 +523,8 @@ function setupRunAnalysis(){
       export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
       printf "%s\n" "${subjects_sessions[@]}" | parallel --jobs ${n} --colsep ' ' \
         runAnalysis \
-        "$(find ${data_path}/{1}/{2}/anat/{1}_{2}_FLAIR.nii.gz)" \
-        "$(find ${data_path}/{1}/{2}/anat/{1}_{2}_T1w.nii.gz)" \
+        "$(find ${data_path}/\{1\}/\{2\}/anat/\{1\}_\{2\}_FLAIR.nii.gz)" \
+        "$(find ${data_path}/\{1\}/\{2\}/anat/\{1\}_\{2\}_T1w.nii.gz)" \
         "${data_path}/derivatives/enigma-pd-wml/{1}/{2}" \
         ">" "'${data_path}/derivatives/enigma-pd-wml/{1}/{2}/{1}_{2}.log'" "2>&1"
     fi
