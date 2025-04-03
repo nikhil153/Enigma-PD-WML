@@ -105,6 +105,12 @@ docker run -v "${PWD}":/data hamiedaharoon24/enigma-pd-wml:<tag>
 
 where `<tag>` is the version of the image you would like to pull.
 
+For example, to run the analysis using version `0.12.0` of the image:
+
+```bash
+docker run -v "${PWD}":/data hamiedaharoon24/enigma-pd-wml:0.12.0
+```
+
 Note, the image will be downloaded from Docker Hub the first time you run a particular version of the
 image.
 
@@ -118,23 +124,23 @@ apptainer build enigma-pd-wml-<tag>.sif docker://hamiedaharoon24/enigma-pd-wml:<
 ```
 
 where `<tag>` is the version of the image you would like to pull. For example, to build an Apptainer
-image from version `0.7.0` of the Docker image:
+image from version `0.12.0` of the Docker image:
 
 ```bash
-apptainer build enigma-pd-wml-0.7.0.sif docker://hamiedaharoon24/enigma-pd-wml:0.7.0
+apptainer build enigma-pd-wml-0.12.0.sif docker://hamiedaharoon24/enigma-pd-wml:0.12.0
 ```
 
-This will create an `enigma-pd-wml-0.7.0.sif` image file in your current working directory.
+This will create an `enigma-pd-wml-0.12.0.sif` image file in your current working directory.
 
 To run the analysis (changing the version number in the filename if necessary):
 
 ```bash
-apptainer run --bind "${PWD}":/data enigma-pd-wml-0.7.0.sif
+apptainer run --bind "${PWD}":/data enigma-pd-wml-0.12.0.sif
 ```
 
 Note, this requires either:
 
-- the `enigma-pd-wml-0.7.0.sif` file is in your current working
+- the `enigma-pd-wml-0.12.0.sif` file is in your current working
   directory (which should be your top-level BIDS data directory)
 - or, you provide the full path to the `.sif` file in the command
 
