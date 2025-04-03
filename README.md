@@ -9,6 +9,7 @@ the same scanning session. The analysis steps (including pre- and post- processi
 
 - [FSL (FMRIB Software Library)](https://fsl.fmrib.ox.ac.uk/fsl/docs/) : a library of analysis tools for FMRI, MRI and
   diffusion brain imaging data.
+  We are using version 6.0.7.13 of FSL.
 
 - [UNet-pgs](https://www.sciencedirect.com/science/article/pii/S1053811921004171?via%3Dihub) : A segmentation pipeline
   for white matter hyperintensities (WMHs) using U-Net.
@@ -48,6 +49,11 @@ If you want to use Apptainer instead, then follow the
 [installation instructions on their website](https://apptainer.org/docs/user/main/quick_start.html).
 
 ## 2. Convert data to BIDS format (if required)
+
+<!-- markdownlint-disable MD028/no-blanks-blockquote -->
+> [!NOTE]
+> We recommend you convert your data to BIDS format before running the pipeline. If you prefer not to convert your data
+> to BIDS, you can [run the pipeline on non-BIDS data](./docs/non-bids-data).
 
 If your data isn't structured in BIDS format, we recommend you use [Nipoppy](https://nipoppy.readthedocs.io)
 to restructure your into the required format.
@@ -99,6 +105,12 @@ docker run -v "${PWD}":/data hamiedaharoon24/enigma-pd-wml:<tag>
 
 where `<tag>` is the version of the image you would like to pull.
 
+For example, to run the analysis using version `0.12.0` of the image:
+
+```bash
+docker run -v "${PWD}":/data hamiedaharoon24/enigma-pd-wml:0.12.0
+```
+
 Note, the image will be downloaded from Docker Hub the first time you run a particular version of the
 image.
 
@@ -112,23 +124,23 @@ apptainer build enigma-pd-wml-<tag>.sif docker://hamiedaharoon24/enigma-pd-wml:<
 ```
 
 where `<tag>` is the version of the image you would like to pull. For example, to build an Apptainer
-image from version `0.7.0` of the Docker image:
+image from version `0.12.0` of the Docker image:
 
 ```bash
-apptainer build enigma-pd-wml-0.7.0.sif docker://hamiedaharoon24/enigma-pd-wml:0.7.0
+apptainer build enigma-pd-wml-0.12.0.sif docker://hamiedaharoon24/enigma-pd-wml:0.12.0
 ```
 
-This will create an `enigma-pd-wml-0.7.0.sif` image file in your current working directory.
+This will create an `enigma-pd-wml-0.12.0.sif` image file in your current working directory.
 
 To run the analysis (changing the version number in the filename if necessary):
 
 ```bash
-apptainer run --bind "${PWD}":/data enigma-pd-wml-0.7.0.sif
+apptainer run --bind "${PWD}":/data enigma-pd-wml-0.12.0.sif
 ```
 
 Note, this requires either:
 
-- the `enigma-pd-wml-0.7.0.sif` file is in your current working
+- the `enigma-pd-wml-0.12.0.sif` file is in your current working
   directory (which should be your top-level BIDS data directory)
 - or, you provide the full path to the `.sif` file in the command
 
@@ -159,8 +171,14 @@ Note, this requires either:
 
 - `-s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
 
+- `-l` : path to CSV file containing list of subjects to include in the analysis. This should only be used if you would
+  like to [run the pipelineon non-BIDS data](./docs/non-bids-data.md). This path must be relative to your data directory.
+
 > [!NOTE]
-> If both `-f` and `-s` are omitted, the pipeline will be run on all subjects.
+> If `-f`, `-s`, and `-l` are omitted, the pipeline will be run on all subjects and assume data is in BIDS format.
+<!-- markdownlint-disable MD028/no-blanks-blockquote -->
+> [!NOTE]
+> If a CSV file is passed using the `-l` option, `-f` and `-s` will be ignored.
 
 ## Pipeline output
 
@@ -170,10 +188,10 @@ After running your analysis, your data directory should have the following struc
 
 ```bash
 data
+├── enigma-pd-wml.log
 ├── dataset_description.json
 ├── derivatives
 │   └── enigma-pd-wml
-│       ├── enigma-pd-wml.log
 │       ├── enigma-pd-wml-results.zip
 │       └── sub-1
 │           ├── ses-1
@@ -234,12 +252,8 @@ These zip files should contain 12 files:
 
 - `FLAIR_biascorr_brain_to_MNI_nonlin.nii.gz`: FLAIR bias-corrected brain non-linearly warped to MNI space.
 
-#### Top-level zip file
-
-A top-level zip file will also be created (`derivatives/enigma-pd-wml/enigma-pd-wml-results.zip`). This will contain all
-zip files for each session.
-
-**Please send this top-level zip file to the ENIGMA-PD Vasc team.**
+> [!NOTE]
+> Please send these zip files to the ENIGMA-PD Vasc team.
 
 #### Intermediate files
 
@@ -250,10 +264,14 @@ and `derivatives/enigma-pd-wml/<subject>/<session>/output` folders.
 
 Pipeline logs can be found at:
 
-- `derivatives/enigma-pd-wml/enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
+- `enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
 
 - `derivatives/enigma-pd-wml/<subject>/<session>/<subject>_<session>.log`: one log per session; contains information about
   the various processing steps.
+
+## Quality control
+
+See notes on [quality control](docs/qc.md) for the WML pipeline.
 
 ## Common issues
 
@@ -277,3 +295,24 @@ You may want to try:
 
 Some brief notes on the development setup for this repository are provided in a
 [separate developer docs file](/docs/developer.md).
+
+## License
+
+This software is licensed under BSD Clause 3. See the [LICENSE](LICENSE) file for details.
+
+FSL is released under a 'free for non-commercial purposes license', and
+is bundled with third-party libraries 'released under a range of different open source licenses'.
+See the [FSL license](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/license) for full details.
+
+## Contributors
+
+### Creators
+
+Drs Sarah Al-Bachari, Hamied Haroon, Robin Long, Kimberley Meecham and Paul Smith. With specialist input from Professor
+Neda Jahanshad, Dr Conor Owens-Walton and Miss Sunanda Somu and Dr Chris Vriend.
+
+### Acknowledgements and Thanks
+
+Academy of Medical Sciences and Professor Schrag for directly supporting the project.  The Centre for Advanced Research
+Computing at UCL. All members of the ENIGMA-PD core team. Professor Laura Parkes and the University of Manchester
+computing facilities.
