@@ -9,6 +9,7 @@ the same scanning session. The analysis steps (including pre- and post- processi
 
 - [FSL (FMRIB Software Library)](https://fsl.fmrib.ox.ac.uk/fsl/docs/) : a library of analysis tools for FMRI, MRI and
   diffusion brain imaging data.
+  We are using version 6.0.7.13 of FSL.
 
 - [UNet-pgs](https://www.sciencedirect.com/science/article/pii/S1053811921004171?via%3Dihub) : A segmentation pipeline
   for white matter hyperintensities (WMHs) using U-Net.
@@ -284,3 +285,13 @@ You may want to try:
 
 Some brief notes on the development setup for this repository are provided in a
 [separate developer docs file](/docs/developer.md).
+
+## License
+
+This software is licensed under BSD Clause 3. See the [LICENSE](LICENSE) file for details.
+
+FSL is released under a 'free for non-commercial purposes license', and
+is bundled with third-party libraries 'released under a range of different open source licenses'.
+See the [FSL license](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/license) for full details.
+
+'
