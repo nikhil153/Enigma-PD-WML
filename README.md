@@ -49,6 +49,11 @@ If you want to use Apptainer instead, then follow the
 
 ## 2. Convert data to BIDS format (if required)
 
+<!-- markdownlint-disable MD028/no-blanks-blockquote -->
+> [!NOTE]
+> We recommend you convert your data to BIDS format before running the pipeline. If you prefer not to convert your data
+> to BIDS, you can [run the pipeline on non-BIDS data](./docs/non-bids-data).
+
 If your data isn't structured in BIDS format, we recommend you use [Nipoppy](https://nipoppy.readthedocs.io)
 to restructure your into the required format.
 
@@ -159,8 +164,14 @@ Note, this requires either:
 
 - `-s` : Comma-separated list of subjects to include in the analysis, e.g. `-s sub-1,sub-2,sub-3`
 
+- `-l` : path to CSV file containing list of subjects to include in the analysis. This should only be used if you would
+  like to [run the pipelineon non-BIDS data](./docs/non-bids-data.md). This path must be relative to your data directory.
+
 > [!NOTE]
-> If both `-f` and `-s` are omitted, the pipeline will be run on all subjects.
+> If `-f`, `-s`, and `-l` are omitted, the pipeline will be run on all subjects and assume data is in BIDS format.
+<!-- markdownlint-disable MD028/no-blanks-blockquote -->
+> [!NOTE]
+> If a CSV file is passed using the `-l` option, `-f` and `-s` will be ignored.
 
 ## Pipeline output
 
@@ -170,10 +181,10 @@ After running your analysis, your data directory should have the following struc
 
 ```bash
 data
+├── enigma-pd-wml.log
 ├── dataset_description.json
 ├── derivatives
 │   └── enigma-pd-wml
-│       ├── enigma-pd-wml.log
 │       ├── enigma-pd-wml-results.zip
 │       └── sub-1
 │           ├── ses-1
@@ -234,12 +245,8 @@ These zip files should contain 12 files:
 
 - `FLAIR_biascorr_brain_to_MNI_nonlin.nii.gz`: FLAIR bias-corrected brain non-linearly warped to MNI space.
 
-#### Top-level zip file
-
-A top-level zip file will also be created (`derivatives/enigma-pd-wml/enigma-pd-wml-results.zip`). This will contain all
-zip files for each session.
-
-**Please send this top-level zip file to the ENIGMA-PD Vasc team.**
+> [!NOTE]
+> Please send these zip files to the ENIGMA-PD Vasc team.
 
 #### Intermediate files
 
@@ -250,7 +257,7 @@ and `derivatives/enigma-pd-wml/<subject>/<session>/output` folders.
 
 Pipeline logs can be found at:
 
-- `derivatives/enigma-pd-wml/enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
+- `enigma-pd-wml.log`: contains minimal information about the initial pipeline setup.
 
 - `derivatives/enigma-pd-wml/<subject>/<session>/<subject>_<session>.log`: one log per session; contains information about
   the various processing steps.
