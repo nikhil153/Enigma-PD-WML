@@ -384,8 +384,9 @@ function runAnalysis (){
 
    flair_fn=$1
    t1_fn=$2
-   data_outfile=$3  # output file name relative to the /data directory
-   export data_outdir=$(dirname "${data_outfile}")
+   data_outfile=$3
+   data_outdir=$(dirname "${data_outfile}")
+   export data_outdir
 
    echo "Processing session with:"
    echo flair_fn : ${flair_fn}
@@ -492,7 +493,7 @@ function setupRunAnalysis(){
           mkdir -p ${data_outdir}
         fi
       done < "$csv_file"
-      export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist      
+      export -f runAnalysis fslAnat flairPrep ventDistMapping prepImagesForUnet unetsPgs processOutputs allFilesExist
       tail -n +2 "$csv_file" | parallel --jobs ${n} --colsep ',' \
           runAnalysis \
           "${data_path}/{1}" \
