@@ -1,3 +1,4 @@
 [default.extend-words]
 # Don't correct -thr option
 thr = "thr"
+center = "center"
