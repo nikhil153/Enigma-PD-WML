@@ -301,8 +301,8 @@ Some brief notes on the development setup for this repository are provided in a
 This software is licensed under BSD Clause 3. See the [LICENSE](LICENSE) file for details.
 
 FSL is released under a 'free for non-commercial purposes license', and
-is bundled with third-party libraries 'released under a range of different open source licenses'.
-See the [FSL license](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/license) for full details.
+  is bundled with third-party libraries 'released under a range of different open source licenses'.
+  See the [FSL license](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/license) for full details.
 
 ## Contributors
 
@@ -316,3 +316,35 @@ Neda Jahanshad, Dr Conor Owens-Walton and Miss Sunanda Somu and Dr Chris Vriend.
 Academy of Medical Sciences and Professor Schrag for directly supporting the project.  The Centre for Advanced Research
 Computing at UCL. All members of the ENIGMA-PD core team. Professor Laura Parkes and the University of Manchester
 computing facilities.
+
+## Citations
+
+`FSL`:
+
+- M. Jenkinson, C.F. Beckmann, T.E. Behrens, M.W. Woolrich, S.M. Smith. FSL.
+  NeuroImage, 62:782-90, 2012
+
+- Jenkinson, M., Bannister, P., Brady, J. M. and Smith, S. M. Improved Optimisation for the
+  Robust and Accurate Linear Registration and Motion Correction of Brain Images.
+  NeuroImage, 17(2), 825-841, 2002.
+
+- Andersson JLR, Jenkinson M, Smith S (2010) Non-linear registration, aka spatial normalisation.
+  FMRIB technical report TR07JA2
+
+- Zhang, Y. and Brady, M. and Smith, S. Segmentation of brain MR images through a
+  hidden Markov random field model and the expectation-maximization algorithm.
+  IEEE Trans Med Imag, 20(1):45-57, 2001
+
+- L. Griffanti, G. Zamboni, A. Khan, L. Li, G. Bonifacio, V. Sundaresan,
+  U. G. Schulz, W. Kuker, M. Battaglini, P. M. Rothwell, M. Jenkinson (2016)
+  BIANCA (Brain Intensity AbNormality Classification Algorithm): a new tool for
+  automated segmentation of white matter hyperintensities. Neuroimage. 141:191-205
+
+`UNets`:
+
+- Park, G., Hong, J., Duffy, B. A., Lee, J. M., & Kim, H. (2021). White matter hyperintensities segmentation
+  using the ensemble U-Net with multi-scale highlighting foregrounds.Neuroimage, 237, 118140.
+
+`Nipoppy`:
+
+- <https://github.com/nipoppy/nipoppy.git>, doi: 10.5281/zenodo.8084759
