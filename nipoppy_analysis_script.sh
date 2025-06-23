@@ -438,10 +438,10 @@ function parseArguments() {
         ;;
       p)
       # participant <-> subject
-        subject="${OPTARG}"
+        subject=sub-"${OPTARG}"
         ;;
       s)        
-        session="${OPTARG}"
+        session=ses-"${OPTARG}"
         ;;
       ?)
         echo "Invalid option: -${OPTARG}."
