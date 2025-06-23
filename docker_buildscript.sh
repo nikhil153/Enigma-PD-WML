@@ -1,1 +1,1 @@
-docker build -f Dockerfile -t enigma-pd-wml .
+docker build -f Dockerfile_nipoppy -t enigma-pd-wml .
