@@ -1,0 +1,27 @@
+{
+    "NAME": "enigma-pd-wml",
+    "VERSION": "0.12.0",
+    "CONTAINER_INFO": {
+        "FILE": "[[NIPOPPY_DPATH_CONTAINERS]]/[[PIPELINE_NAME]]_[[PIPELINE_VERSION]].sif",
+        "URI": "docker://hamiedaharoon24/[[PIPELINE_NAME]]:[[PIPELINE_VERSION]]"
+    },
+    "CONTAINER_CONFIG": {
+        "ENV_VARS": {
+        },
+        "ARGS": [
+            "--bind", "[[NIPOPPY_DPATH_BIDS]]:/data",
+            "--bind", "[[NIPOPPY_DPATH_PIPELINE_OUTPUT]]:/output"
+        ]
+    },
+    "STEPS": [
+        {
+            "INVOCATION_FILE": "invocation.json",
+            "DESCRIPTOR_FILE": "descriptor.json",
+            "TRACKER_CONFIG_FILE": "tracker_config.json"
+        }
+    ],
+    "VARIABLES": {
+    },
+    "PIPELINE_TYPE": "processing",
+    "SCHEMA_VERSION": "1"
+}

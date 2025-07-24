@@ -1,0 +1,41 @@
+{
+    "name": "enigma-pd-wml",
+    "description": "white matter lesions (WMLs) segementation pipeline",
+    "tool-version": "0.12.0",
+    "schema-version": "0.5",
+    "command-line": "[[NIPOPPY_CONTAINER_COMMAND]] [[NIPOPPY_FPATH_CONTAINER]] [PARTICIPANT_LABEL] [SESSION_ID]",
+    "inputs": [
+        {
+            "id": "participant_label",
+            "name": "participant_label",
+            "description": "A space delimited list of participant identifiers or a single identifier (the sub- prefix can be removed).",
+            "optional": false,
+            "type": "String",
+            "value-key": "[PARTICIPANT_LABEL]",
+            "list": false,
+            "command-line-flag": "-p"
+        },
+        {
+            "id": "session_id",
+            "name": "session_id",
+            "description": "Filter input dataset by session ID.",
+            "optional": false,
+            "type": "String",
+            "value-key": "[SESSION_ID]",
+            "command-line-flag": "-s"
+        }
+    ],
+    "tags": {
+    },
+    "suggested-resources": {
+        "cpu-cores": 1,
+        "ram": 1,
+        "walltime-estimate": 60
+    },
+    "error-codes": [
+        {
+            "code": 1,
+            "description": "Crashed"
+        }
+    ]
+}
