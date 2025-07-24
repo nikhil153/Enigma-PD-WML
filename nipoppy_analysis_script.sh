@@ -467,12 +467,20 @@ function setupRunAnalysis(){
   echo "subject: ${subject}"
   echo "session: ${session}"
 
-  t1_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_T1w.nii.gz)
-  flair_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}_FLAIR.nii.gz)
+  # check for multiple runs or acquisitions per subject/session
+  n_t1=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}*_T1w.nii.gz | wc -l)
+  n_flair=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}*_FLAIR.nii.gz | wc -l)
+  if [[ $n_t1 -ne 1 ]] || [[ $n_flair -ne 1 ]]; then
+    echo "Error: Expected exactly one T1 and one FLAIR image for subject ${subject}, session ${session}. Found ${n_t1} T1 and ${n_flair} FLAIR images."
+    continue
+  fi
+  # find the single T1 and FLAIR images assuming the naming convention is consistent
+  t1_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}*_T1w.nii.gz)
+  flair_fn=$(find ${data_path}/${subject}/${session}/anat/${subject}_${session}*_FLAIR.nii.gz)
+
   data_outdir=${output_path}/${subject}/${session}
   data_outfile=${output_path}/${subject}/${session}/${subject}_${session}_results.zip
   runAnalysis "$flair_fn" "$t1_fn" "$data_outfile" > "${data_outdir}/${subject}_${session}.log" 2>&1
-
 }
 
 # assign paths for code and input data directories, as well as overall log file
